@@ -1,0 +1,131 @@
+#main {
+    -fx-background-color: white;
+}
+
+#top-bar {
+    -fx-fill: #0000001A;
+}
+
+.redButtons {
+    -fx-background-color: #47474700;
+    -fx-text-fill: red;
+}
+.redButtons:hover {
+    -fx-background-color: red;
+    -fx-text-fill: white;
+}
+.redButtons:focused {
+    -fx-background-color: red;
+    -fx-text-fill: white;
+}
+.redButtons:pressed {
+    -fx-background-color: #940202;
+    -fx-text-fill: white;
+}
+
+#minimizeButton {
+    -fx-background-color: #FFFFFF00;
+    -fx-text-fill: black;
+}
+#minimizeButton:hover {
+    -fx-background-color: #bebebe;
+    -fx-text-fill: black;
+}
+#minimizeButton:focused {
+    -fx-background-color: #bebebe;
+    -fx-text-fill: black;
+}
+#minimizeButton:pressed {
+    -fx-background-color: #8f8f8f;
+    -fx-text-fill: black;
+}
+
+.labels {
+    -fx-fill: black;
+}
+
+.separators {
+    -fx-stroke: black;
+}
+
+#lightModeButton {
+    -fx-background-color: #FFA500FF;
+}
+#lightModeButton:hover {
+    -fx-background-color: #ea9900;
+}
+#lightModeButton:focused {
+    -fx-background-color: #ea9900;
+}
+
+#darkModeButton {
+    -fx-background-color: #E5E5E500;
+    -fx-text-fill: black;
+}
+#darkModeButton:hover {
+    -fx-background-color: #bebebe;
+    -fx-text-fill: black;
+}
+#darkModeButton:focused {
+    -fx-background-color: #bebebe;
+    -fx-text-fill: black;
+}
+
+.main-buttons {
+    -fx-background-color: white;
+    -fx-text-fill: black;
+}
+.main-buttons:hover {
+    -fx-background-color: #d5d5d5;
+    -fx-text-fill: black;
+}
+.main-buttons:focused {
+    -fx-background-color: #d5d5d5;
+    -fx-text-fill: black;
+}
+
+.toggles {
+    -fx-text-fill: red;
+    -fx-background-color: white;
+    -fx-cursor: hand;
+}
+
+.toggles:selected {
+    -fx-text-fill: green;
+}
+
+.scroll-pane {
+    -fx-padding: 10;
+    -fx-background: white;
+    -fx-border-color: white;
+    -fx-text-fill: black;
+}
+
+.scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.promptButtons {
+    -fx-background-color: #f3f3f3;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+.promptButtons:hover {
+    -fx-background-color: #d7d7d7;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+.promptButtons:focused {
+    -fx-background-color: #d7d7d7;
+    -fx-text-fill: black;
+    -fx-cursor: hand;
+}
+
+.choice-box .context-menu {
+    -fx-background-color: #f3f3f3;
+    -fx-cursor: hand;
+}
+
+.table-view .column-header-background .filler {
+    -fx-background-color: white;
+}
