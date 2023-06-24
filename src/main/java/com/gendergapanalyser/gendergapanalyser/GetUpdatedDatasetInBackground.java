@@ -9,9 +9,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -62,6 +60,27 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                 return;
             }
 
+            //Checking to see if the user setting were already loaded in Main, and loading them if not
+            if (Main.language == null && Main.displayMode == null) {
+                try {
+                    BufferedReader loadUserSettings = new BufferedReader(new FileReader("src/main/resources/com/gendergapanalyser/gendergapanalyser/UserSettings.txt"));
+                    String setting;
+                    while ((setting = loadUserSettings.readLine()) != null) {
+                        String[] settingParts = setting.split("=");
+                        if (settingParts[0].equals("DisplayMode")) Main.displayMode = settingParts[1];
+                        else Main.language = settingParts[1];
+                    }
+                    loadUserSettings.close();
+                } catch (IOException ignored) {}
+            }
+
+            //Checking to see if this thread is interrupted and stopping it if it is
+            if (Thread.currentThread().isInterrupted()) {
+                Files.delete(downloadedDatasetPath);
+                return;
+            }
+
+            //Checking to see if the currently open window is the main menu one
             if (Main.getCurrentStage().getTitle() != null && !Main.getCurrentStage().getTitle().equals(Main.language.equals("EN") ? "Main Menu" : Main.language.equals("FR") ? "Menu Principal" : "Meniu Principal") || predictionsGenerated || PDFGenerated) {
                 Platform.runLater(() -> {
                     //Preparing the alert informing the user that new data has been found and applied
@@ -69,11 +88,17 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                     refreshInfo.setTitle(Main.language.equals("EN") ? "Got new data" : Main.language.equals("FR") ? "Nouveaux données obtenus" : "Date noi obținute");
                     refreshInfo.setHeaderText(Main.language.equals("EN") ? "Got new data" : Main.language.equals("FR") ? "Nouveaux données obtenus" : "Date noi obținute");
                     refreshInfo.setContentText(Main.language.equals("EN") ? "Updated statistics were found and the app has been refreshed with them applied. If you generated a PDF report or predictions, they were deleted as they're no longer current." : Main.language.equals("FR") ? "Des nouveaux statistiques ont été trouvés et l'application a été rafraîchie avec eux appliquées. Si vous avez généré un rapport PDF ou des prédictions, ils étaient effacés à cause du fait qu'ils ne sont plus actuelles." : "Noi statistici au fost găsite iar aplicația a fost reîmprospătată cu ele aplicate. Dacă ați generat un raport PDF sau predicții, acestea au fost șterse deoarece nu mai sunt de actualitate.");
+                    refreshInfo.getDialogPane().setMaxWidth(750);
+                    refreshInfo.initStyle(StageStyle.UNDECORATED);
+                    if (Main.displayMode.equals("Dark")) {
+                        refreshInfo.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
+                        refreshInfo.getDialogPane().getStyleClass().add("alerts");
+                    }
                     //Replacing the current window with a new one containing the main menu screen
                     Stage mainMenu = new Stage();
                     mainMenu.initStyle(StageStyle.UNDECORATED);
                     //Setting the new window's title
-                    mainMenu.setTitle(Main.language.equals("EN") ? "Main Menu" : Main.language.equals("FR") ? "Menu Principal" : "Meniu Principal");
+                    mainMenu.setTitle(Main.language == null || Main.language.equals("EN") ? "Main Menu" : Main.language.equals("FR") ? "Menu Principal" : "Meniu Principal");
                     try {
                         //Preparing the new window
                         mainMenu.setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
@@ -97,9 +122,22 @@ public class GetUpdatedDatasetInBackground implements Runnable {
             Platform.runLater(() -> {
                 Main.connectError = !e.getMessage().equals("Read timed out");
                 Alert errorDownload = new Alert(Alert.AlertType.ERROR);
-                errorDownload.setTitle("Error obtaining updated information");
-                errorDownload.setHeaderText("We could not download updated information!");
-                errorDownload.setContentText((e.getMessage().equals("Read timed out") ? "Updated information was found, but could not be downloaded quickly enough. " : "We could not connect to the server to obtain updated information quickly enough. ") + "Maybe the server is down at this moment, or there are internet connection problems on your end. Please check your internet connection, then restart the app to try the download again!");
+                if (Main.language.equals("EN")) {
+                    errorDownload.setTitle("Failed to obtain updated information");
+                    errorDownload.setHeaderText("We could not download updated information!");
+                    errorDownload.setContentText("Maybe the server is down at this moment, or there are internet connection problems on your end. Please check your internet connection, then restart the app to try the download again.");
+                }
+                else {
+                    errorDownload.setTitle(Main.language.equals("FR") ? "Échec lors de l'obtention d'informations actualisées" : "Eroare în a descărca informații actualizate");
+                    errorDownload.setHeaderText(Main.language.equals("FR") ? "On ne pouvait pas télécharger d'informations actualisées !" : "Nu am putut descărca informații actualizate!");
+                    errorDownload.setContentText(Main.language.equals("FR") ? "Peut-être que le serveur est indisponible à ce moment, ou vous avez des problèmes des connexion a l'internet. Veuillez vérifier votre connexion internet, après redémarrez l'application pour réessayer le téléchargement." : "Se poate ca serverul să fie indisponibil momentan, sau să aveți probleme de conexiune la internet. Vă rugăm să verificați conexiunea dumneavoastră la internet, apoi sa reporniți aplicația pentru a reîncerca descărcarea.");
+                }
+                errorDownload.getDialogPane().setMaxWidth(750);
+                errorDownload.initStyle(StageStyle.UNDECORATED);
+                if (Main.displayMode.equals("Dark")) {
+                    errorDownload.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
+                    errorDownload.getDialogPane().getStyleClass().add("alerts");
+                }
                 errorDownload.show();
             });
         }

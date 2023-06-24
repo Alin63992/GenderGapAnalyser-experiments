@@ -7,6 +7,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -15,6 +17,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.commons.validator.routines.EmailValidator;
 
+import java.awt.*;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
@@ -192,7 +195,19 @@ public class Main extends Application implements Initializable {
         loadingCircleImageView.setImage(new Image(image));
         image.close();
         backgroundOperations.setVisible(true);
-        new Thread(new GeneratePDFInBackground()).start();
+        try {
+            if (processData.predictionsGenerated && processData.PDFGeneratedWithPredictions && !processData.changedLanguage || !processData.predictionsGenerated && !processData.PDFGeneratedWithPredictions && !processData.changedLanguage) {
+                //Locating an existing generated report PDF
+                File existingPDF = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf");
+                //Opening it
+                Desktop.getDesktop().open(existingPDF);
+                backgroundOperations.setVisible(false);
+            }
+            else throw new IllegalArgumentException();
+        }
+        catch (IllegalArgumentException e) {
+            new Thread(new GeneratePDFInBackground()).start();
+        }
     }
 
     //Function used to increase (increment) the value of the prediction field, if it is a number and if it is in the [1, 100] range
@@ -362,6 +377,12 @@ public class Main extends Application implements Initializable {
                 Alert errorSendingEmail = new Alert(Alert.AlertType.ERROR);
                 errorSendingEmail.setTitle(Main.language.equals("EN") ? "No internet connection" : Main.language.equals("FR") ? "Pas de connexion internet" : "Fără conexiune internet");
                 errorSendingEmail.setHeaderText(Main.language.equals("EN") ? "The report couldn't be sent!\nPlease check your internet connection, or wait for a bit then try again!" : Main.language.equals("FR") ? "Le rapport n'a pas pu être envoyé !\nVeuillez vérifier votre connexion internet, ou attendez un peu et réessayez !" : "Raportul nu a putut fi trimis!\nVă rugăm verificați conexiunea la internet, sau așteptați puțin si reîncercați!");
+                errorSendingEmail.getDialogPane().setMaxWidth(750);
+                errorSendingEmail.initStyle(StageStyle.UNDECORATED);
+                if (displayMode.equals("Dark")) {
+                    errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
+                    errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
+                }
                 errorSendingEmail.show();
             }
         }
@@ -387,6 +408,12 @@ public class Main extends Application implements Initializable {
             confirmInclusionOfUserData.getButtonTypes().clear();
             confirmInclusionOfUserData.getButtonTypes().add(yesButton);
             confirmInclusionOfUserData.getButtonTypes().add(noButton);
+            confirmInclusionOfUserData.getDialogPane().setMaxWidth(750);
+            confirmInclusionOfUserData.initStyle(StageStyle.UNDECORATED);
+            if (displayMode.equals("Dark")) {
+                confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
+                confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
+            }
             Optional<ButtonType> confirmationResult = confirmInclusionOfUserData.showAndWait();
             if (confirmationResult.isPresent() && confirmationResult.get() == yesButton) {
                 FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
@@ -402,17 +429,12 @@ public class Main extends Application implements Initializable {
     @Override
     public void start(Stage primaryStage) {
         try {
-            //Locating the resources folder where the datasets should be placed
-            File folder = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser");
+            //Trying to download the dataset file from the U.S. Department of Labor server
+            downloadDataset.start();
 
-            //Searching for the dataset(s)
-            File[] files = folder.listFiles((dir, name) -> name.endsWith(".csv"));
-
-            //Checking to see if there are multiple CSV datasets
-            if (files != null && files.length <= 1) {
-                //Trying to download the dataset file from the U.S. Department of Labor server
-                downloadDataset.start();
-
+            //Checking to see if the user settings were already loaded by the GetUpdatedDatasetInBackground thread,
+            // and loading them if not
+            if (language == null && displayMode == null) {
                 //Loading user settings (display mode and app language) from the UserSettings.txt file
                 try {
                     BufferedReader loadUserSettings = new BufferedReader(new FileReader("src/main/resources/com/gendergapanalyser/gendergapanalyser/UserSettings.txt"));
@@ -424,47 +446,33 @@ public class Main extends Application implements Initializable {
                     }
                     loadUserSettings.close();
                 } catch (IOException ignored) {}
+            }
 
-                //Preparing the dataset and creating the plots
-                processData = new DataProcessing();
-                processData.prepareData();
+            //Preparing the dataset and creating the plots
+            processData = new DataProcessing();
+            processData.prepareData();
 
-                //Setting the primary stage so that other controllers can use it to display what they need displayed
-                setCurrentStage(primaryStage);
-                getCurrentStage().initStyle(StageStyle.UNDECORATED);
+            //Setting the primary stage so that other controllers can use it to display what they need displayed
+            setCurrentStage(primaryStage);
+            getCurrentStage().initStyle(StageStyle.UNDECORATED);
 
-                //Setting the main menu to be shown on the application window
-                getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + language + ".fxml")).load()));
-                getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
+            //Setting the main menu to be shown on the application window
+            getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + language + ".fxml")).load()));
+            getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
 
-                //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
-                getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
+            //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
+            getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
 
-                //Setting the window title
-                getCurrentStage().setTitle(language.equals("EN") ? "Main Menu" : language.equals("FR") ? "Menu Principal" : "Meniu Principal");
-                getCurrentStage().centerOnScreen();
+            //Setting the window title
+            getCurrentStage().setTitle(language.equals("EN") ? "Main Menu" : language.equals("FR") ? "Menu Principal" : "Meniu Principal");
+            getCurrentStage().centerOnScreen();
 
-                //Setting the window to be not resizable
-                getCurrentStage().setResizable(false);
+            //Setting the window to be not resizable
+            getCurrentStage().setResizable(false);
 
-                //Opening the window
-                getCurrentStage().show();
-            } else if (files != null) {
-                //If there are multiple datasets, we show an error stating so and terminate the program
-                Alert multipleDatasets = new Alert(Alert.AlertType.ERROR);
-                multipleDatasets.setTitle("Multiple dataset files found!");
-                multipleDatasets.setHeaderText("It looks like there are " + files.length + " dataset files in the src/main/resources/com/gendergapanalyser/gendergapanalyser folder. Please provide only one.");
-                multipleDatasets.show();
-                multipleDatasets.setOnCloseRequest(a -> primaryStage.close());
-            } else throw new IOException();
-        } catch (IOException e) {
-            e.printStackTrace();
-            //If there are no datasets, we show an error stating so and terminate the program
-            Alert noDataset = new Alert(Alert.AlertType.ERROR);
-            noDataset.setTitle("No usable data found!");
-            noDataset.setHeaderText("We couldn't find a file with usable data to be analysed. \nPlease provide a CSV file in the src/main/resources/com/gendergapanalyser/gendergapanalyser folder, \nthen re-run the application.");
-            noDataset.show();
-            noDataset.setOnCloseRequest(a -> primaryStage.close());
+            //Opening the window
+            getCurrentStage().show();
+        } catch (IOException ignored) {
         }
     }
 
@@ -524,6 +532,7 @@ public class Main extends Application implements Initializable {
         });
     }
 
+    //Launch time!
     public static void main(String[] args) {
         launch();
     }

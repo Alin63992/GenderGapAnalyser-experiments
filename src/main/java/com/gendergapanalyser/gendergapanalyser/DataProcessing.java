@@ -993,16 +993,7 @@ public class DataProcessing {
     //Function that creates a PDF containing the graph with all the genders, pay gap and predictions (if it's the case), interpretations, dataset with or without predictions and the yearly pay gaps
     public void createPDF() throws IOException, DocumentException {
         //Trying to open an already generated report PDF. If there isn't one, or if it was generated without including predictions when predictions exist or vice versa, the report is regenerated.
-        try {
-            if (predictionsGenerated && PDFGeneratedWithPredictions && !changedLanguage || !predictionsGenerated && !PDFGeneratedWithPredictions && !changedLanguage) {
-                //Locating an existing generated report PDF
-                File existingPDF = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf");
-                //Opening it
-                Desktop.getDesktop().open(existingPDF);
-            }
-            else throw new IllegalArgumentException();
-        }
-        catch (IllegalArgumentException e) {
+
             //Creating a PDF document
             Document pdf = new Document();
             PdfWriter.getInstance(pdf, new FileOutputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf"));
@@ -1156,9 +1147,6 @@ public class DataProcessing {
 
             PDFGeneratedWithPredictions = predictionsGenerated;
             changedLanguage = false;
-
-            //We open it in the user's default PDF viewer
-            Desktop.getDesktop().open(new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf"));
         }
-    }
+
 }

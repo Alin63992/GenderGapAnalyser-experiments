@@ -174,3 +174,21 @@
     -fx-background-color: #232323;
     -fx-cursor: hand;
 }
+
+.alerts {
+    -fx-background-color: black;
+}
+.alerts .header-panel {
+    -fx-background-color: #3b3b3bb8;
+}
+.alerts .label {
+    -fx-text-fill: white;
+}
+.alert .button {
+    -fx-background-color: #232323;
+    -fx-text-fill: white;
+}
+.alert .button:hover {
+    -fx-background-color: #4b4b4b;
+    -fx-text-fill: white;
+}
