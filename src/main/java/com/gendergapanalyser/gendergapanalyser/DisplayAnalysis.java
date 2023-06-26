@@ -1,5 +1,8 @@
 package com.gendergapanalyser.gendergapanalyser;
 
+import animatefx.animation.FadeOut;
+import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
+import eu.iamgio.animated.transition.Animation;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -94,8 +97,10 @@ public class DisplayAnalysis implements Initializable {
         buildUserSettings.close();
         if (Main.processData.predictionsGenerated) Main.processData.createSalaryGraphWithPredictionsForEverybody();
         Main.processData.createSalaryGraphForEverybody();
-        Main.getCurrentStage().getScene().getStylesheets().clear();
-        Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
+        Main.getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        switchTheme.pause();
     }
 
     //Function used when initializing the screen by populating the scroll panes with the interpretations

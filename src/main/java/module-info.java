@@ -10,6 +10,8 @@ module com.gendergapanalyser.gendergapanalyser {
     requires javafx.graphics;
     requires itextpdf;
     requires org.controlsfx.controls;
+    requires AnimateFX;
+    requires eu.iamgio.animated;
 
 
     opens com.gendergapanalyser.gendergapanalyser to javafx.fxml;

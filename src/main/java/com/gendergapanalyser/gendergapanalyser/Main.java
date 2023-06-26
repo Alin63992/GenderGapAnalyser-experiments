@@ -1,14 +1,18 @@
 package com.gendergapanalyser.gendergapanalyser;
 
+import animatefx.animation.FadeOut;
+import eu.iamgio.animated.transition.AnimatedSwitcher;
+import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
+import eu.iamgio.animated.transition.Animation;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
@@ -28,6 +32,10 @@ import java.util.ResourceBundle;
 
 public class Main extends Application implements Initializable {
     private static Stage currentStage;
+    @FXML
+    private AnchorPane emptyAnchor;
+    @FXML
+    private AnimatedSwitcher animatedSwitcher;
     @FXML
     private AnchorPane titleBar;
     @FXML
@@ -143,8 +151,10 @@ public class Main extends Application implements Initializable {
         buildUserSettings.close();
         if (processData.predictionsGenerated) processData.createSalaryGraphWithPredictionsForEverybody();
         processData.createSalaryGraphForEverybody();
-        Main.getCurrentStage().getScene().getStylesheets().clear();
-        Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
+        Main.getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        switchTheme.pause();
     }
 
     //Function used to close the main menu screen and open the graph screen in a new window
@@ -195,6 +205,10 @@ public class Main extends Application implements Initializable {
         loadingCircleImageView.setImage(new Image(image));
         image.close();
         backgroundOperations.setVisible(true);
+        //Trying to open an already generated report PDF.
+        //If there isn't one, it was generated in a different language than the current language of the application,
+        // or if it was generated without including predictions when predictions exist or vice versa,
+        // the report is regenerated.
         try {
             if (processData.predictionsGenerated && processData.PDFGeneratedWithPredictions && !processData.changedLanguage || !processData.predictionsGenerated && !processData.PDFGeneratedWithPredictions && !processData.changedLanguage) {
                 //Locating an existing generated report PDF

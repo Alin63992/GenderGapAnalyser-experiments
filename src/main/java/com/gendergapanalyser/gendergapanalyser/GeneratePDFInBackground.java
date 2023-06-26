@@ -37,6 +37,7 @@ public class GeneratePDFInBackground implements Runnable {
             throw new RuntimeException(e);
         }
 
+        //Reloading the main menu screen so the wait screen is removed and the menu is usable again
         Platform.runLater(() -> {
             try {
                 Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));

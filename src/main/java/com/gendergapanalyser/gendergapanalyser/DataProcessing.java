@@ -992,161 +992,158 @@ public class DataProcessing {
 
     //Function that creates a PDF containing the graph with all the genders, pay gap and predictions (if it's the case), interpretations, dataset with or without predictions and the yearly pay gaps
     public void createPDF() throws IOException, DocumentException {
-        //Trying to open an already generated report PDF. If there isn't one, or if it was generated without including predictions when predictions exist or vice versa, the report is regenerated.
+        //Creating a PDF document
+        Document pdf = new Document();
+        PdfWriter.getInstance(pdf, new FileOutputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf"));
 
-            //Creating a PDF document
-            Document pdf = new Document();
-            PdfWriter.getInstance(pdf, new FileOutputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf"));
+        //Opening it for writing
+        pdf.open();
 
-            //Opening it for writing
-            pdf.open();
+        //Creating the title of the PDF that contains the range of years it covers (1960 to the last year of the dataset or the last predicted year), centering it on the line then adding it to the PDF
+        Paragraph title = new Paragraph((Main.language.equals("EN") ? "Gender Equality in the United States, since the year 1960 to " : Main.language.equals("FR") ? "Égalité entre les Genres dans les États Unis, depuis l'année 1960 jusqu'à " : "Egalitatea intre Genuri in Statele Unite, din anul 1960 pana in ") + (predictionsGenerated ? datasetWithPredictions[datasetWithPredictions.length - 1][1] : dataset[dataset.length - 1][1]), new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLUE));
+        title.setAlignment(Element.ALIGN_CENTER);
+        pdf.add(title);
 
-            //Creating the title of the PDF that contains the range of years it covers (1960 to the last year of the dataset or the last predicted year), centering it on the line then adding it to the PDF
-            Paragraph title = new Paragraph((Main.language.equals("EN") ? "Gender Equality in the United States, since the year 1960 to " : Main.language.equals("FR") ? "Égalité entre les Genres dans les États Unis, depuis l'année 1960 jusqu'à " : "Egalitatea intre Genuri in Statele Unite, din anul 1960 pana in ") + (predictionsGenerated ? datasetWithPredictions[datasetWithPredictions.length - 1][1] : dataset[dataset.length - 1][1]), new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD, BaseColor.BLUE));
-            title.setAlignment(Element.ALIGN_CENTER);
-            pdf.add(title);
-
-            //Checking to see what the app's display mode has been set to, so that we can generate a light graph if the app is set to dark mode
-            Image graph;
-            if (Main.displayMode.equals("Dark")) {
-                //Temporarily setting the displayMode variable to Light so we can generate light backgrounds to be set on light pages
-                Main.displayMode = "Light";
-                //Generating graphs based on the predictions existing or not
-                if (predictionsGenerated) {
-                    createSalaryGraphWithPredictionsForEverybody();
-                }
-                else {
-                    createSalaryGraphForEverybody();
-                }
-                //Creating an image containing the graph with all the genders and the pay gap, with or without predictions
-                graph = Image.getInstance(predictionsGenerated ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap.png");
-                //Setting the displayMode variable back to dark
-                Main.displayMode = "Dark";
-                //Regenerating graphs to be dark to be displayed in the app
-                if (predictionsGenerated) {
-                    createSalaryGraphWithPredictionsForEverybody();
-                }
-                else {
-                    createSalaryGraphForEverybody();
-                }
+        //Checking to see what the app's display mode has been set to, so that we can generate a light graph if the app is set to dark mode
+        Image graph;
+        if (Main.displayMode.equals("Dark")) {
+            //Temporarily setting the displayMode variable to Light so we can generate light backgrounds to be set on light pages
+            Main.displayMode = "Light";
+            //Generating graphs based on the predictions existing or not
+            if (predictionsGenerated) {
+                createSalaryGraphWithPredictionsForEverybody();
             }
             else {
-                //Creating an image containing the graph with all the genders and the pay gap, with or without predictions, scaling it so it fits the entire width of the page minus the left and right margins, and the height being the width - 150, then adding it to the PDF
-                graph = Image.getInstance(predictionsGenerated ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap.png");
+                createSalaryGraphForEverybody();
             }
-            //Scaling the graph so it fits the entire width of the page minus the left and right margins, and the height being the width - 150, then adding it to the PDF
-            graph.scaleAbsoluteWidth(pdf.getPageSize().getWidth() - pdf.leftMargin() - pdf.rightMargin());
-            graph.scaleAbsoluteHeight(graph.getScaledWidth() - 150);
-            pdf.add(graph);
-
-            //Creating a paragraph as a subtitle for the women's evolution interpretation, a paragraph for the interpretation and a new line to separate it from the rest of the document, then adding them to the PDF
-            //Removing diacritics if the app language is set to Romanian since itextpdf cannot write Romanian diacritics
-            pdf.add(new Paragraph(Main.language.equals("EN") ? "How did women's salaries evolve?" : Main.language.equals("FR") ? "Comment ont évolué les salaires des femmes ?" : "Cum au evoluat salariile femeilor?", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
-            pdf.add(new Paragraph(Main.language.equals("RO") ? Normalizer.normalize(predictionsGenerated ? womenAnalysisWithPredictions : womenAnalysis, Normalizer.Form.NFKD).replaceAll("\\p{M}", "") : predictionsGenerated ? womenAnalysisWithPredictions : womenAnalysis, new Font(Font.FontFamily.HELVETICA, 14)));
-            pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
-
-            //Creating a paragraph as a subtitle for the men's evolution interpretation, a paragraph for the interpretation and a new line to separate it from the rest of the document, then adding them to the PDF
-            pdf.add(new Paragraph(Main.language.equals("EN") ? "How did men's salaries evolve?" : Main.language.equals("FR") ? "Comment ont évolué les salaires d'hommes ?" : "Cum au evoluat salariile barbatilor?", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
-            pdf.add(new Paragraph(Main.language.equals("RO") ? Normalizer.normalize(predictionsGenerated ? menAnalysisWithPredictions : menAnalysis, Normalizer.Form.NFKD).replaceAll("\\p{M}", "") : predictionsGenerated ? menAnalysisWithPredictions : menAnalysis, new Font(Font.FontFamily.HELVETICA, 14)));
-            pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
-
-            //Creating a paragraph as a subtitle for the wage gap's evolution interpretation, a paragraph for the interpretation and a new line to separate it from the rest of the document, then adding them to the PDF
-            pdf.add(new Paragraph(Main.language.equals("EN") ? "How did the pay gap evolve?" : Main.language.equals("FR") ? "Comment a évolué la différence de la paye ?" : "Cum a evoluat diferenta intre salarii?", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
-            pdf.add(new Paragraph(Main.language.equals("RO") ? Normalizer.normalize(predictionsGenerated ? wageGapAnalysisWithPredictions : wageGapAnalysis, Normalizer.Form.NFKD).replaceAll("\\p{M}", "") : predictionsGenerated ? wageGapAnalysisWithPredictions : wageGapAnalysis, new Font(Font.FontFamily.HELVETICA, 14)));
-            pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
-
-            //Creating a paragraph as a subtitle for the dataset and a new line to create a bit of space between the subtitle and the dataset table, then adding them to the PDF
-            pdf.add(new Paragraph(Main.language.equals("EN") ? "Data used" : Main.language.equals("FR") ? "Données utilisés" : "Date utilizate", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
-            pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
-
-            //Creating the table which will contain the dataset and the yearly pay gaps
-            PdfPTable datasetTablePDF = new PdfPTable(4);
-
-            //Creating 4 cells to be used as headers, setting their background color and adding them to the table
-            PdfPCell yearHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Year" : "An"));
-            yearHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            datasetTablePDF.addCell(yearHeader);
-            PdfPCell womenHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Women's Salary" : Main.language.equals("FR") ? "Salaire des Femmes" : "Salariul Femeilor"));
-            womenHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            datasetTablePDF.addCell(womenHeader);
-            PdfPCell menHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Men's Salary" : Main.language.equals("FR") ? "Salaire d'Hommes" : "Salariul Barbatilor"));
-            menHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            datasetTablePDF.addCell(menHeader);
-            PdfPCell gapHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Pay Gap" : Main.language.equals("FR") ? "Différence de la Paye" : "Diferenta intre Salarii"));
-            gapHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            datasetTablePDF.addCell(gapHeader);
-
-            //Creating 4 variables where each year and the respective salaries and wage gap will be stored
-            String year = "";
-            String womanSalary = "";
-            String manSalary = "";
-            String payGap = "";
-
-            //Iterating over the dataset that includes or not the predictions, depending on the case
-            for (String[] statistic : predictionsGenerated ? datasetWithPredictions : dataset) {
-                //If we have something set in the 4 string variables above
-                if (!year.equals("") && !womanSalary.equals("") && !manSalary.equals("") && !payGap.equals("")) {
-                    //We create a cell for each, containing what each string variable contains
-                    PdfPCell yearCell = new PdfPCell(new Phrase(year));
-                    //We only set the year's cell background to be different
-                    yearCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-                    PdfPCell womanSalaryCell = new PdfPCell(new Phrase(womanSalary));
-                    PdfPCell manSalaryCell = new PdfPCell(new Phrase(manSalary));
-                    PdfPCell payGapCell = new PdfPCell(new Phrase(payGap));
-
-                    //We add the cells to the table
-                    datasetTablePDF.addCell(yearCell);
-                    datasetTablePDF.addCell(womanSalaryCell);
-                    datasetTablePDF.addCell(manSalaryCell);
-                    datasetTablePDF.addCell(payGapCell);
-
-                    //Then we set the string variables with the current statistics
-                    year = statistic[1];
-                    if (statistic[0].equals("Women"))
-                        womanSalary = formatSalary(statistic[2]);
-                    else
-                        womanSalary = "";
-                    if (statistic[0].equals("Men"))
-                        manSalary = formatSalary(statistic[2]);
-                    else
-                        manSalary = "";
-                    //Here we subtract the first year of the array from the current year because we need the positional indexes, 1960 is the first year of the dataset
-                    payGap = formatSalary(predictionsGenerated ? genderPayGapWithPredictions[Integer.parseInt(year) - Integer.parseInt(genderPayGapWithPredictions[0][0])][1] : genderPayGap[Integer.parseInt(year) - Integer.parseInt(genderPayGap[0][0])][1]);
-                }
-                //If we have just begun creating the table and don't have something in the 4 string variables, we set them with the current statistic
-                else {
-                    year = statistic[1];
-                    if (statistic[0].equals("Women"))
-                        womanSalary = formatSalary(statistic[2]);
-                    else
-                        manSalary = formatSalary(statistic[2]);
-                    payGap = formatSalary(predictionsGenerated ? genderPayGapWithPredictions[Integer.parseInt(year) - Integer.parseInt(genderPayGapWithPredictions[0][0])][1] : genderPayGap[Integer.parseInt(year) - Integer.parseInt(genderPayGap[0][0])][1]);
-                }
+            //Creating an image containing the graph with all the genders and the pay gap, with or without predictions
+            graph = Image.getInstance(predictionsGenerated ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap.png");
+            //Setting the displayMode variable back to dark
+            Main.displayMode = "Dark";
+            //Regenerating graphs to be dark to be displayed in the app
+            if (predictionsGenerated) {
+                createSalaryGraphWithPredictionsForEverybody();
             }
+            else {
+                createSalaryGraphForEverybody();
+            }
+        }
+        else {
+            //Creating an image containing the graph with all the genders and the pay gap, with or without predictions, scaling it so it fits the entire width of the page minus the left and right margins, and the height being the width - 150, then adding it to the PDF
+            graph = Image.getInstance(predictionsGenerated ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap.png");
+        }
+        //Scaling the graph so it fits the entire width of the page minus the left and right margins, and the height being the width - 150, then adding it to the PDF
+        graph.scaleAbsoluteWidth(pdf.getPageSize().getWidth() - pdf.leftMargin() - pdf.rightMargin());
+        graph.scaleAbsoluteHeight(graph.getScaledWidth() - 150);
+        pdf.add(graph);
 
-            //Because iterating the dataset finishes before adding the last year to the PDF table, we add it now
-            //We create a cell for each, containing what each string variable contains
-            PdfPCell yearCell = new PdfPCell(new Phrase(year));
-            //We only set the year's cell background to be different
-            yearCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
-            PdfPCell womanSalaryCell = new PdfPCell(new Phrase(womanSalary));
-            PdfPCell manSalaryCell = new PdfPCell(new Phrase(manSalary));
-            PdfPCell payGapCell = new PdfPCell(new Phrase(payGap));
+        //Creating a paragraph as a subtitle for the women's evolution interpretation, a paragraph for the interpretation and a new line to separate it from the rest of the document, then adding them to the PDF
+        //Removing diacritics if the app language is set to Romanian since itextpdf cannot write Romanian diacritics
+        pdf.add(new Paragraph(Main.language.equals("EN") ? "How did women's salaries evolve?" : Main.language.equals("FR") ? "Comment ont évolué les salaires des femmes ?" : "Cum au evoluat salariile femeilor?", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
+        pdf.add(new Paragraph(Main.language.equals("RO") ? Normalizer.normalize(predictionsGenerated ? womenAnalysisWithPredictions : womenAnalysis, Normalizer.Form.NFKD).replaceAll("\\p{M}", "") : predictionsGenerated ? womenAnalysisWithPredictions : womenAnalysis, new Font(Font.FontFamily.HELVETICA, 14)));
+        pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
 
-            //We add the cells to the table
-            datasetTablePDF.addCell(yearCell);
-            datasetTablePDF.addCell(womanSalaryCell);
-            datasetTablePDF.addCell(manSalaryCell);
-            datasetTablePDF.addCell(payGapCell);
+        //Creating a paragraph as a subtitle for the men's evolution interpretation, a paragraph for the interpretation and a new line to separate it from the rest of the document, then adding them to the PDF
+        pdf.add(new Paragraph(Main.language.equals("EN") ? "How did men's salaries evolve?" : Main.language.equals("FR") ? "Comment ont évolué les salaires d'hommes ?" : "Cum au evoluat salariile barbatilor?", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
+        pdf.add(new Paragraph(Main.language.equals("RO") ? Normalizer.normalize(predictionsGenerated ? menAnalysisWithPredictions : menAnalysis, Normalizer.Form.NFKD).replaceAll("\\p{M}", "") : predictionsGenerated ? menAnalysisWithPredictions : menAnalysis, new Font(Font.FontFamily.HELVETICA, 14)));
+        pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
 
-            //We add the created table to the PDF
-            pdf.add(datasetTablePDF);
+        //Creating a paragraph as a subtitle for the wage gap's evolution interpretation, a paragraph for the interpretation and a new line to separate it from the rest of the document, then adding them to the PDF
+        pdf.add(new Paragraph(Main.language.equals("EN") ? "How did the pay gap evolve?" : Main.language.equals("FR") ? "Comment a évolué la différence de la paye ?" : "Cum a evoluat diferenta intre salarii?", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
+        pdf.add(new Paragraph(Main.language.equals("RO") ? Normalizer.normalize(predictionsGenerated ? wageGapAnalysisWithPredictions : wageGapAnalysis, Normalizer.Form.NFKD).replaceAll("\\p{M}", "") : predictionsGenerated ? wageGapAnalysisWithPredictions : wageGapAnalysis, new Font(Font.FontFamily.HELVETICA, 14)));
+        pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
 
-            //We finish editing the PDF
-            pdf.close();
+        //Creating a paragraph as a subtitle for the dataset and a new line to create a bit of space between the subtitle and the dataset table, then adding them to the PDF
+        pdf.add(new Paragraph(Main.language.equals("EN") ? "Data used" : Main.language.equals("FR") ? "Données utilisés" : "Date utilizate", new Font(Font.FontFamily.HELVETICA, 14, Font.BOLDITALIC)));
+        pdf.add(new Paragraph("\n", new Font(Font.FontFamily.HELVETICA, 18)));
 
-            PDFGeneratedWithPredictions = predictionsGenerated;
-            changedLanguage = false;
+        //Creating the table which will contain the dataset and the yearly pay gaps
+        PdfPTable datasetTablePDF = new PdfPTable(4);
+
+        //Creating 4 cells to be used as headers, setting their background color and adding them to the table
+        PdfPCell yearHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Year" : "An"));
+        yearHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        datasetTablePDF.addCell(yearHeader);
+        PdfPCell womenHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Women's Salary" : Main.language.equals("FR") ? "Salaire des Femmes" : "Salariul Femeilor"));
+        womenHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        datasetTablePDF.addCell(womenHeader);
+        PdfPCell menHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Men's Salary" : Main.language.equals("FR") ? "Salaire d'Hommes" : "Salariul Barbatilor"));
+        menHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        datasetTablePDF.addCell(menHeader);
+        PdfPCell gapHeader = new PdfPCell(new Phrase(Main.language.equals("EN") ? "Pay Gap" : Main.language.equals("FR") ? "Différence de la Paye" : "Diferenta intre Salarii"));
+        gapHeader.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        datasetTablePDF.addCell(gapHeader);
+
+        //Creating 4 variables where each year and the respective salaries and wage gap will be stored
+        String year = "";
+        String womanSalary = "";
+        String manSalary = "";
+        String payGap = "";
+
+        //Iterating over the dataset that includes or not the predictions, depending on the case
+        for (String[] statistic : predictionsGenerated ? datasetWithPredictions : dataset) {
+            //If we have something set in the 4 string variables above
+            if (!year.equals("") && !womanSalary.equals("") && !manSalary.equals("") && !payGap.equals("")) {
+                //We create a cell for each, containing what each string variable contains
+                PdfPCell yearCell = new PdfPCell(new Phrase(year));
+                //We only set the year's cell background to be different
+                yearCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                PdfPCell womanSalaryCell = new PdfPCell(new Phrase(womanSalary));
+                PdfPCell manSalaryCell = new PdfPCell(new Phrase(manSalary));
+                PdfPCell payGapCell = new PdfPCell(new Phrase(payGap));
+
+                //We add the cells to the table
+                datasetTablePDF.addCell(yearCell);
+                datasetTablePDF.addCell(womanSalaryCell);
+                datasetTablePDF.addCell(manSalaryCell);
+                datasetTablePDF.addCell(payGapCell);
+
+                //Then we set the string variables with the current statistics
+                year = statistic[1];
+                if (statistic[0].equals("Women"))
+                    womanSalary = formatSalary(statistic[2]);
+                else
+                    womanSalary = "";
+                if (statistic[0].equals("Men"))
+                    manSalary = formatSalary(statistic[2]);
+                else
+                    manSalary = "";
+                //Here we subtract the first year of the array from the current year because we need the positional indexes, 1960 is the first year of the dataset
+                payGap = formatSalary(predictionsGenerated ? genderPayGapWithPredictions[Integer.parseInt(year) - Integer.parseInt(genderPayGapWithPredictions[0][0])][1] : genderPayGap[Integer.parseInt(year) - Integer.parseInt(genderPayGap[0][0])][1]);
+            }
+            //If we have just begun creating the table and don't have something in the 4 string variables, we set them with the current statistic
+            else {
+                year = statistic[1];
+                if (statistic[0].equals("Women"))
+                    womanSalary = formatSalary(statistic[2]);
+                else
+                    manSalary = formatSalary(statistic[2]);
+                payGap = formatSalary(predictionsGenerated ? genderPayGapWithPredictions[Integer.parseInt(year) - Integer.parseInt(genderPayGapWithPredictions[0][0])][1] : genderPayGap[Integer.parseInt(year) - Integer.parseInt(genderPayGap[0][0])][1]);
+            }
         }
 
+        //Because iterating the dataset finishes before adding the last year to the PDF table, we add it now
+        //We create a cell for each, containing what each string variable contains
+        PdfPCell yearCell = new PdfPCell(new Phrase(year));
+        //We only set the year's cell background to be different
+        yearCell.setBackgroundColor(BaseColor.LIGHT_GRAY);
+        PdfPCell womanSalaryCell = new PdfPCell(new Phrase(womanSalary));
+        PdfPCell manSalaryCell = new PdfPCell(new Phrase(manSalary));
+        PdfPCell payGapCell = new PdfPCell(new Phrase(payGap));
+
+        //We add the cells to the table
+        datasetTablePDF.addCell(yearCell);
+        datasetTablePDF.addCell(womanSalaryCell);
+        datasetTablePDF.addCell(manSalaryCell);
+        datasetTablePDF.addCell(payGapCell);
+
+        //We add the created table to the PDF
+        pdf.add(datasetTablePDF);
+
+        //We finish editing the PDF
+        pdf.close();
+
+        PDFGeneratedWithPredictions = predictionsGenerated;
+        changedLanguage = false;
+    }
 }

@@ -17,6 +17,11 @@
 
 <AnchorPane id="main" prefHeight="790.0" prefWidth="1300.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gendergapanalyser.gendergapanalyser.DisplayEvolutionGraph">
    <children>
+      <Hyperlink opacity="0.0">
+         <font>
+            <Font size="1.0" />
+         </font>
+      </Hyperlink>
       <AnchorPane fx:id="titleBar">
          <children>
             <Rectangle id="top-bar" arcHeight="5.0" arcWidth="5.0" fill="#0000001a" height="100.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1300.0" />
