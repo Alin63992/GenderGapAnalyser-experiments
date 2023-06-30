@@ -1,6 +1,8 @@
 package com.gendergapanalyser.gendergapanalyser;
 
+import animatefx.animation.FadeIn;
 import animatefx.animation.FadeOut;
+import eu.iamgio.animated.transition.AnimatedSwitcher;
 import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
 import eu.iamgio.animated.transition.Animation;
 import javafx.application.Application;
@@ -15,6 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -31,6 +34,7 @@ import java.util.ResourceBundle;
 
 public class Main extends Application implements Initializable {
     private static Stage currentStage;
+    public AnimatedSwitcher animSwitcher;
     @FXML
     private AnchorPane titleBar;
     @FXML
@@ -267,8 +271,13 @@ public class Main extends Application implements Initializable {
     //Function used to hide or show the prompt which asks the user for the period of time they need wage prediction for
     @FXML
     private void togglePredictionPrompt() {
+        animSwitcher.setOut(new Animation(new FadeOut()).setSpeed(2));
+        animSwitcher.setIn(new Animation(new FadeIn()).setSpeed(3));
         //If the prompt is visible
         if (predictionPrompt.isVisible()) {
+            animSwitcher.setChild(null);
+            //We hide the prompt
+            predictionPrompt.setVisible(false);
             //We set the text in the prediction input field back to the default
             predictionField.setText("1");
             //We hide the invalid number warning
@@ -282,11 +291,12 @@ public class Main extends Application implements Initializable {
             languagePicker.setFocusTraversable(true);
             lightModeButton.setFocusTraversable(true);
             darkModeButton.setFocusTraversable(true);
-            //We hide the prompt
-            predictionPrompt.setVisible(false);
         }
         //If the prompt is hidden
         else {
+            if (animSwitcher.getChild() == null)
+                animSwitcher.of(null);
+            animSwitcher.setChild(new Pane(predictionPrompt));
             //Running the prediction function when the Enter key is pressed
             predictionPrompt.setOnKeyPressed(a -> attemptPrediction());
             //Setting the 4 main menu buttons, the language picker and the display mode toggle on the menu bar to not be accessible with tab/arrow keys
@@ -351,8 +361,11 @@ public class Main extends Application implements Initializable {
     //Function used to hide or show the prompt which asks the user for the period of time they need wage prediction for
     @FXML
     private void toggleEmailPrompt() {
+        animSwitcher.setOut(new Animation(new FadeOut()).setSpeed(2));
+        animSwitcher.setIn(new Animation(new FadeIn()).setSpeed(3));
         //If the prompt is visible
         if (emailPrompt.isVisible()) {
+            animSwitcher.setChild(null);
             //We hide the invalid number warning
             invalidEmailWarning.setVisible(false);
             //We set the 4 buttons on the main menu, the language picker and the display mode toggle on the menu bar to be selectable using the tab/arrow keys
@@ -370,6 +383,9 @@ public class Main extends Application implements Initializable {
         //If the prompt is hidden
         else {
             if (!connectError) {
+                if (animSwitcher.getChild() == null)
+                    animSwitcher.of(null);
+                animSwitcher.setChild(new Pane(emailPrompt));
                 //Setting the 4 main menu buttons, the language picker and the display mode toggle on the menu bar to not be accessible with tab/arrow keys
                 predictButton.setFocusTraversable(false);
                 graphsButton.setFocusTraversable(false);
