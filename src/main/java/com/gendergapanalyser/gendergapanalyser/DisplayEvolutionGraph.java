@@ -1,6 +1,9 @@
 package com.gendergapanalyser.gendergapanalyser;
 
 import animatefx.animation.FadeOut;
+import animatefx.animation.FadeOutLeft;
+import animatefx.animation.SlideInRight;
+import eu.iamgio.animated.transition.AnimatedSwitcher;
 import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
 import eu.iamgio.animated.transition.Animation;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,6 +20,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -90,11 +94,15 @@ public class DisplayEvolutionGraph implements Initializable {
     //Function triggered when the user wants to display the graph page
     @FXML
     private void goToAnalysisPage() throws IOException {
+        AnimatedSwitcher as = new AnimatedSwitcher(new Animation(new SlideInRight()).setSpeed(3), new Animation(new FadeOutLeft()));
+        Scene scene = new Scene(new Pane(as));
+        as.of(Main.getCurrentStage().getScene().getRoot());
+        as.setChild(new FXMLLoader(getClass().getResource("Analysis-" + Main.language + ".fxml")).load());
+        scene.getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
         //Changing the title of the current stage
         Main.getCurrentStage().setTitle(Main.language.equals("EN") ? "Interpretations" : Main.language.equals("FR") ? "Interprétations" : "Interpretări");
-        //Displaying the analysis page on the current stage
-        Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("Analysis-" + Main.language + ".fxml")).load()));
-        Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        //Displaying the graph page on the current stage
+        Main.getCurrentStage().setScene(scene);
         switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
         switchTheme.init();
     }
