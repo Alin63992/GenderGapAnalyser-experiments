@@ -184,11 +184,13 @@
 .alerts .label {
     -fx-text-fill: white;
 }
-.alert .button {
+.alerts .button {
     -fx-background-color: #232323;
     -fx-text-fill: white;
+    -fx-cursor: hand;
 }
-.alert .button:hover {
+.alerts .button:hover {
     -fx-background-color: #4b4b4b;
     -fx-text-fill: white;
+    -fx-cursor: hand;
 }

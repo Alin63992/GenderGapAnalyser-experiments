@@ -1,7 +1,6 @@
 package com.gendergapanalyser.gendergapanalyser;
 
 import animatefx.animation.FadeOut;
-import eu.iamgio.animated.transition.AnimatedSwitcher;
 import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
 import eu.iamgio.animated.transition.Animation;
 import javafx.application.Application;
@@ -32,10 +31,6 @@ import java.util.ResourceBundle;
 
 public class Main extends Application implements Initializable {
     private static Stage currentStage;
-    @FXML
-    private AnchorPane emptyAnchor;
-    @FXML
-    private AnimatedSwitcher animatedSwitcher;
     @FXML
     private AnchorPane titleBar;
     @FXML
@@ -87,10 +82,12 @@ public class Main extends Application implements Initializable {
     protected static int predictionValue = 0;
     protected static String email = "";
     protected static boolean connectError = false;
+    private AnimatedThemeSwitcher switchTheme;
 
     //Function used to set the currently open window to be used in the future
     public static void setCurrentStage(Stage s) {
         Main.currentStage = s;
+        Main.currentStage.setOnCloseRequest(action -> exitAppMain());
     }
 
     //Function used by the DisplayEvolutionGraph class to get the currently open window
@@ -151,10 +148,7 @@ public class Main extends Application implements Initializable {
         buildUserSettings.close();
         if (processData.predictionsGenerated) processData.createSalaryGraphWithPredictionsForEverybody();
         processData.createSalaryGraphForEverybody();
-        AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
-        switchTheme.init();
         Main.getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-        switchTheme.pause();
     }
 
     //Function used to close the main menu screen and open the graph screen in a new window
@@ -174,6 +168,8 @@ public class Main extends Application implements Initializable {
         getCurrentStage().close();
         //Setting the graph window as the currently open window
         setCurrentStage(graphStage);
+        switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
         //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
@@ -194,6 +190,8 @@ public class Main extends Application implements Initializable {
         getCurrentStage().close();
         //Setting the analysis window as the currently open window
         setCurrentStage(analysisStage);
+        switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
         //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
@@ -393,10 +391,8 @@ public class Main extends Application implements Initializable {
                 errorSendingEmail.setHeaderText(Main.language.equals("EN") ? "The report couldn't be sent!\nPlease check your internet connection, or wait for a bit then try again!" : Main.language.equals("FR") ? "Le rapport n'a pas pu être envoyé !\nVeuillez vérifier votre connexion internet, ou attendez un peu et réessayez !" : "Raportul nu a putut fi trimis!\nVă rugăm verificați conexiunea la internet, sau așteptați puțin si reîncercați!");
                 errorSendingEmail.getDialogPane().setMaxWidth(750);
                 errorSendingEmail.initStyle(StageStyle.UNDECORATED);
-                if (displayMode.equals("Dark")) {
-                    errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
-                    errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
-                }
+                errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
                 errorSendingEmail.show();
             }
         }
@@ -424,10 +420,8 @@ public class Main extends Application implements Initializable {
             confirmInclusionOfUserData.getButtonTypes().add(noButton);
             confirmInclusionOfUserData.getDialogPane().setMaxWidth(750);
             confirmInclusionOfUserData.initStyle(StageStyle.UNDECORATED);
-            if (displayMode.equals("Dark")) {
-                confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
-                confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
-            }
+            confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+            confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
             Optional<ButtonType> confirmationResult = confirmInclusionOfUserData.showAndWait();
             if (confirmationResult.isPresent() && confirmationResult.get() == yesButton) {
                 FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
@@ -470,9 +464,12 @@ public class Main extends Application implements Initializable {
             setCurrentStage(primaryStage);
             getCurrentStage().initStyle(StageStyle.UNDECORATED);
 
+
             //Setting the main menu to be shown on the application window
             getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + language + ".fxml")).load()));
             getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
+            switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+            switchTheme.init();
 
             //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
             getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
@@ -527,6 +524,8 @@ public class Main extends Application implements Initializable {
                 //Reloading the main menu screen so that it uses the new language
                 getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + languagesShort[newValue.intValue()] + ".fxml")).load()));
                 getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
+                switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+                switchTheme.init();
             } catch (IOException ignored) {}
         }));
 

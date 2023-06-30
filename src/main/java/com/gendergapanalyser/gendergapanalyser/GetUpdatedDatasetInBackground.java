@@ -90,10 +90,8 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                     refreshInfo.setContentText(Main.language.equals("EN") ? "Updated statistics were found and the app has been refreshed with them applied. If you generated a PDF report or predictions, they were deleted as they're no longer current." : Main.language.equals("FR") ? "Des nouveaux statistiques ont été trouvés et l'application a été rafraîchie avec eux appliquées. Si vous avez généré un rapport PDF ou des prédictions, ils étaient effacés à cause du fait qu'ils ne sont plus actuelles." : "Noi statistici au fost găsite iar aplicația a fost reîmprospătată cu ele aplicate. Dacă ați generat un raport PDF sau predicții, acestea au fost șterse deoarece nu mai sunt de actualitate.");
                     refreshInfo.getDialogPane().setMaxWidth(750);
                     refreshInfo.initStyle(StageStyle.UNDECORATED);
-                    if (Main.displayMode.equals("Dark")) {
-                        refreshInfo.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
-                        refreshInfo.getDialogPane().getStyleClass().add("alerts");
-                    }
+                    refreshInfo.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    refreshInfo.getDialogPane().getStyleClass().add("alerts");
                     //Replacing the current window with a new one containing the main menu screen
                     Stage mainMenu = new Stage();
                     mainMenu.initStyle(StageStyle.UNDECORATED);
@@ -134,10 +132,8 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                 }
                 errorDownload.getDialogPane().setMaxWidth(750);
                 errorDownload.initStyle(StageStyle.UNDECORATED);
-                if (Main.displayMode.equals("Dark")) {
-                    errorDownload.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
-                    errorDownload.getDialogPane().getStyleClass().add("alerts");
-                }
+                errorDownload.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                errorDownload.getDialogPane().getStyleClass().add("alerts");
                 errorDownload.show();
             });
         }

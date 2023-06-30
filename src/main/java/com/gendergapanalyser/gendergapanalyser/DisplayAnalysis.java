@@ -41,6 +41,7 @@ public class DisplayAnalysis implements Initializable {
     private ScrollPane menAnalysisPane;
     @FXML
     private ScrollPane wageGapAnalysisPane;
+    private AnimatedThemeSwitcher switchTheme;
 
     //Function triggered when the user wants to go back to the main menu
     @FXML
@@ -62,6 +63,8 @@ public class DisplayAnalysis implements Initializable {
         Main.getCurrentStage().close();
         //Setting the new main menu window as the currently open window
         Main.setCurrentStage(mainMenu);
+        switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
         //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         Main.getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
@@ -74,6 +77,8 @@ public class DisplayAnalysis implements Initializable {
         //Displaying the graph page on the current stage
         Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("DisplayEvolutionGraph-" + Main.language + ".fxml")).load()));
         Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
     }
 
     //Function that executes the app closing routine
@@ -97,10 +102,10 @@ public class DisplayAnalysis implements Initializable {
         buildUserSettings.close();
         if (Main.processData.predictionsGenerated) Main.processData.createSalaryGraphWithPredictionsForEverybody();
         Main.processData.createSalaryGraphForEverybody();
-        AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
-        switchTheme.init();
+        //AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        //switchTheme.init();
         Main.getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-        switchTheme.pause();
+        //switchTheme.pause();
     }
 
     //Function used when initializing the screen by populating the scroll panes with the interpretations
@@ -199,6 +204,8 @@ public class DisplayAnalysis implements Initializable {
                 Main.processData.changedLanguage = true;
                 Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("Analysis-" + Main.languagesShort[newValue.intValue()] + ".fxml")).load()));
                 Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+                switchTheme.init();
             } catch (IOException ignored) {}
         }));
 

@@ -69,11 +69,8 @@ public class SendEmailInBackground implements Runnable {
                 emailSent.getDialogPane().setMaxWidth(750);
                 emailSent.initStyle(StageStyle.UNDECORATED);
                 //If the application is set to dark mode, the alert is dark too
-                if (Main.displayMode.equals("Dark")) {
-                    emailSent.getDialogPane().getStylesheets().clear();
-                    emailSent.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
-                    emailSent.getDialogPane().getStyleClass().add("alerts");
-                }
+                emailSent.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                emailSent.getDialogPane().getStyleClass().add("alerts");
 
                 //Reloading the main menu screen so the wait screen is removed and the menu is usable again
                 try {
@@ -91,10 +88,8 @@ public class SendEmailInBackground implements Runnable {
                 errorSendingEmail.setHeaderText(Main.language.equals("EN") ? "The report couldn't be sent!\nPlease check your internet connection, or wait for a bit then try again!" : Main.language.equals("FR") ? "Le rapport n'a pas pu être envoyé !\nVeuillez vérifier votre connexion internet, ou attendez un peu et réessayez !" : "Raportul nu a putut fi trimis!\nVă rugăm verificați conexiunea la internet, sau așteptați puțin si reîncercați!");
                 errorSendingEmail.getDialogPane().setMaxWidth(750);
                 errorSendingEmail.initStyle(StageStyle.UNDECORATED);
-                if (Main.displayMode.equals("Dark")) {
-                    errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/DarkMode.css")).toExternalForm());
-                    errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
-                }
+                errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
                 try {
                     Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
                     Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());

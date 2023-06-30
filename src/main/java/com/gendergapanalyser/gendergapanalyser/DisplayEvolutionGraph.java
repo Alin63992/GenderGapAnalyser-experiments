@@ -56,6 +56,7 @@ public class DisplayEvolutionGraph implements Initializable {
     private ToggleButton includePredictionsToggle;
     @FXML
     private HBox predictionControls;
+    private AnimatedThemeSwitcher switchTheme;
     private final String[] choices_EN = {"Men's and women's wages", "Men's wages", "Women's wages", "Gender wage gap"};
     private final String[] choices_FR = {"Salaires des femmes et d'hommes", "Salaires d'hommes", "Salaires des femmes", "Différence de la paye"};
     private final String[] choices_RO = {"Salariile femeilor si bărbaților", "Salariile bărbaților", "Salariile femeilor", "Diferența între salarii"};
@@ -80,6 +81,8 @@ public class DisplayEvolutionGraph implements Initializable {
         Main.getCurrentStage().close();
         //Setting the new main menu window as the currently open window
         Main.setCurrentStage(mainMenu);
+        switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
         //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         Main.getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
@@ -92,6 +95,8 @@ public class DisplayEvolutionGraph implements Initializable {
         //Displaying the analysis page on the current stage
         Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("Analysis-" + Main.language + ".fxml")).load()));
         Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+        switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+        switchTheme.init();
     }
 
     //Function that executes the app closing routine
@@ -121,10 +126,7 @@ public class DisplayEvolutionGraph implements Initializable {
         Main.processData.createSalaryGraphForEverybody();
         if (!minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) || !maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]))
             Main.processData.createSalaryGraphWithinRangeForEverybody(Integer.parseInt(minimumRangeInput.getText()), Integer.parseInt(maximumRangeInput.getText()));
-        AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
-        switchTheme.init();
         Main.getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-        switchTheme.pause();
         FileInputStream graph = null;
         if (changeGraph.getSelectionModel().getSelectedIndex() == 0 && showPayGapToggle.isSelected()) {
             if (includePredictionsToggle.isSelected())
@@ -427,6 +429,8 @@ public class DisplayEvolutionGraph implements Initializable {
                 Main.processData.changedLanguage = true;
                 Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("DisplayEvolutionGraph-" + Main.languagesShort[newValue.intValue()] + ".fxml")).load()));
                 Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+                switchTheme.init();
             } catch (IOException ignored) {}
         }));
 
