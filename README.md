@@ -25,7 +25,9 @@ It still shows only with the said boxes, but internally there isn't an overlay w
 before showing the waiting box
 and beginning the prediction. The main menu buttons were set
 to be not traversable before showing the prediction input prompt).<br>
+- Git specific: deleted the <b>main-branch</b> branch, since it was no longer used, and replaced it with the <b>master</b> branch that includes all the changes and fixes.<br>
 - Updated the README to include this changelog, which will be updated with every commit.
+Also changed the introduction paragraph of the README.
 </li>
 <br>
 <li>
