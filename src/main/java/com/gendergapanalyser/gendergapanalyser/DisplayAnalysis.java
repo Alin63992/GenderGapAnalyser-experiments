@@ -110,10 +110,7 @@ public class DisplayAnalysis implements Initializable {
         buildUserSettings.close();
         if (Main.processData.predictionsGenerated) Main.processData.createSalaryGraphWithPredictionsForEverybody();
         Main.processData.createSalaryGraphForEverybody();
-        //AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
-        //switchTheme.init();
         Main.getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-        //switchTheme.pause();
     }
 
     //Function used when initializing the screen by populating the scroll panes with the interpretations

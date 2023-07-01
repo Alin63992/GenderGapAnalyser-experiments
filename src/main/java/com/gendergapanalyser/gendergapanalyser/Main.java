@@ -1,7 +1,6 @@
 package com.gendergapanalyser.gendergapanalyser;
 
-import animatefx.animation.FadeIn;
-import animatefx.animation.FadeOut;
+import animatefx.animation.*;
 import eu.iamgio.animated.transition.AnimatedSwitcher;
 import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
 import eu.iamgio.animated.transition.Animation;
@@ -18,6 +17,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -34,7 +34,10 @@ import java.util.ResourceBundle;
 
 public class Main extends Application implements Initializable {
     private static Stage currentStage;
-    public AnimatedSwitcher animSwitcher;
+    public Rectangle darkOverlay;
+    public AnimatedSwitcher darkOverlayAnimator;
+    @FXML
+    private AnimatedSwitcher promptAnimator;
     @FXML
     private AnchorPane titleBar;
     @FXML
@@ -206,7 +209,10 @@ public class Main extends Application implements Initializable {
         FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
         loadingCircleImageView.setImage(new Image(image));
         image.close();
+        promptAnimator.setChild(new Pane(backgroundOperations));
+        darkOverlayAnimator.setChild(new Pane(darkOverlay));
         backgroundOperations.setVisible(true);
+        darkOverlay.setVisible(true);
         //Trying to open an already generated report PDF.
         //If there isn't one, it was generated in a different language than the current language of the application,
         // or if it was generated without including predictions when predictions exist or vice versa,
@@ -217,7 +223,10 @@ public class Main extends Application implements Initializable {
                 File existingPDF = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf");
                 //Opening it
                 Desktop.getDesktop().open(existingPDF);
+                promptAnimator.setChild(null);
+                darkOverlayAnimator.setChild(null);
                 backgroundOperations.setVisible(false);
+                darkOverlay.setVisible(false);
             }
             else throw new IllegalArgumentException();
         }
@@ -271,13 +280,13 @@ public class Main extends Application implements Initializable {
     //Function used to hide or show the prompt which asks the user for the period of time they need wage prediction for
     @FXML
     private void togglePredictionPrompt() {
-        animSwitcher.setOut(new Animation(new FadeOut()).setSpeed(2));
-        animSwitcher.setIn(new Animation(new FadeIn()).setSpeed(3));
         //If the prompt is visible
         if (predictionPrompt.isVisible()) {
-            animSwitcher.setChild(null);
+            promptAnimator.setChild(null);
+            darkOverlayAnimator.setChild(null);
             //We hide the prompt
             predictionPrompt.setVisible(false);
+            darkOverlay.setVisible(false);
             //We set the text in the prediction input field back to the default
             predictionField.setText("1");
             //We hide the invalid number warning
@@ -294,9 +303,8 @@ public class Main extends Application implements Initializable {
         }
         //If the prompt is hidden
         else {
-            if (animSwitcher.getChild() == null)
-                animSwitcher.of(null);
-            animSwitcher.setChild(new Pane(predictionPrompt));
+            promptAnimator.setChild(new Pane(predictionPrompt));
+            darkOverlayAnimator.setChild(new Pane(darkOverlay));
             //Running the prediction function when the Enter key is pressed
             predictionPrompt.setOnKeyPressed(a -> attemptPrediction());
             //Setting the 4 main menu buttons, the language picker and the display mode toggle on the menu bar to not be accessible with tab/arrow keys
@@ -310,6 +318,7 @@ public class Main extends Application implements Initializable {
             darkModeButton.setFocusTraversable(false);
             //Showing the prompt
             predictionPrompt.setVisible(true);
+            darkOverlay.setVisible(true);
             //Setting the focus on the prediction input field
             predictionField.requestFocus();
         }
@@ -325,15 +334,7 @@ public class Main extends Application implements Initializable {
                 FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
                 loadingCircleImageView.setImage(new Image(image));
                 image.close();
-                predictionPrompt.setVisible(false);
-                predictButton.setFocusTraversable(false);
-                graphsButton.setFocusTraversable(false);
-                analysisButton.setFocusTraversable(false);
-                PDFButton.setFocusTraversable(false);
-                mailButton.setFocusTraversable(false);
-                languagePicker.setFocusTraversable(false);
-                lightModeButton.setFocusTraversable(false);
-                darkModeButton.setFocusTraversable(false);
+                promptAnimator.setChild(backgroundOperations);
                 backgroundOperations.setVisible(true);
                 new Thread(new PredictInBackground()).start();
             } else invalidNumberWarning.setVisible(true);
@@ -355,17 +356,23 @@ public class Main extends Application implements Initializable {
         lightModeButton.setFocusTraversable(false);
         darkModeButton.setFocusTraversable(false);
         discardPredictionsButton.setVisible(false);
+        promptAnimator.setChild(discardConfirmation);
+        if (darkOverlayAnimator.getChild() == null)
+            darkOverlayAnimator.setChild(darkOverlay);
         discardConfirmation.setVisible(true);
+        darkOverlay.setVisible(true);
     }
 
     //Function used to hide or show the prompt which asks the user for the period of time they need wage prediction for
     @FXML
     private void toggleEmailPrompt() {
-        animSwitcher.setOut(new Animation(new FadeOut()).setSpeed(2));
-        animSwitcher.setIn(new Animation(new FadeIn()).setSpeed(3));
         //If the prompt is visible
         if (emailPrompt.isVisible()) {
-            animSwitcher.setChild(null);
+            promptAnimator.setChild(null);
+            darkOverlayAnimator.setChild(null);
+            //We hide the prompt
+            emailPrompt.setVisible(false);
+            darkOverlay.setVisible(false);
             //We hide the invalid number warning
             invalidEmailWarning.setVisible(false);
             //We set the 4 buttons on the main menu, the language picker and the display mode toggle on the menu bar to be selectable using the tab/arrow keys
@@ -377,15 +384,12 @@ public class Main extends Application implements Initializable {
             languagePicker.setFocusTraversable(true);
             lightModeButton.setFocusTraversable(true);
             darkModeButton.setFocusTraversable(true);
-            //We hide the prompt
-            emailPrompt.setVisible(false);
         }
         //If the prompt is hidden
         else {
             if (!connectError) {
-                if (animSwitcher.getChild() == null)
-                    animSwitcher.of(null);
-                animSwitcher.setChild(new Pane(emailPrompt));
+                promptAnimator.setChild(new Pane(emailPrompt));
+                darkOverlayAnimator.setChild(new Pane(darkOverlay));
                 //Setting the 4 main menu buttons, the language picker and the display mode toggle on the menu bar to not be accessible with tab/arrow keys
                 predictButton.setFocusTraversable(false);
                 graphsButton.setFocusTraversable(false);
@@ -397,6 +401,7 @@ public class Main extends Application implements Initializable {
                 darkModeButton.setFocusTraversable(false);
                 //Showing the prompt
                 emailPrompt.setVisible(true);
+                darkOverlay.setVisible(true);
                 //Setting the focus on the prediction input field
                 if (!email.equals("")) emailField.setText(email);
                 emailField.requestFocus();
@@ -421,6 +426,7 @@ public class Main extends Application implements Initializable {
             invalidEmailWarning.setVisible(false);
             email = emailField.getText();
             emailPrompt.setVisible(false);
+            darkOverlay.setVisible(false);
             Alert confirmInclusionOfUserData = new Alert(Alert.AlertType.CONFIRMATION);
             confirmInclusionOfUserData.setTitle(language.equals("EN") ? "Inclusion of user data" : language.equals("FR") ? "Inclusion des détails d'utilisateur" : "Includerea datelor utilizatorului");
             confirmInclusionOfUserData.setHeaderText(language.equals("EN") ? "The data below will be attached to the email containing the report. They are data taken from this computer and are used to help you match the data in the email and ensure they don't come from another computer, and they won't be stored anywhere other than in the email.\nDo you agree with the inclusion of said data and have the report sent?" : language.equals("FR") ? "Les données ci-dessous vont être attachées au courriel contenant le rapport. Ils sont des données provenant de cet ordinateur, et sont utilisées pour vous aider vérifier que le courriel vient d'ici et pas d'un autre ordinateur.\nÊtes-vous d'accord avec l'inclusion de ces données et avec l'envoi du rapport?" : "Detaliile de mai jos vor fi incluse în mail. Ele sunt folosite pentru a vă ajuta să vă asigurați că mail-ul vine de aici și nu de pe alt calculator.\nSunteți de acord cu includerea acestor date și trimiterea raportului?");
@@ -443,7 +449,10 @@ public class Main extends Application implements Initializable {
                 FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
                 loadingCircleImageView.setImage(new Image(image));
                 image.close();
+                promptAnimator.setChild(new Pane(backgroundOperations));
+                darkOverlayAnimator.setChild(new Pane(darkOverlay));
                 backgroundOperations.setVisible(true);
+                darkOverlay.setVisible(true);
                 new Thread(new SendEmailInBackground()).start();
             }
         }
@@ -505,6 +514,10 @@ public class Main extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        promptAnimator.setIn(new Animation(new ZoomIn()).setSpeed(3));
+        promptAnimator.setOut(new Animation(new ZoomOut()).setSpeed(10));
+        darkOverlayAnimator.setIn(new Animation(new FadeIn()).setSpeed(3));
+        darkOverlayAnimator.setOut(new Animation(new ZoomOut()).setSpeed(10));
         //Making the window movable when dragging the embedded title bar
         titleBar.setOnMousePressed(event -> {
             dragX = getCurrentStage().getX() - event.getScreenX();
@@ -554,10 +567,12 @@ public class Main extends Application implements Initializable {
             graphsButton.setFocusTraversable(true);
             analysisButton.setFocusTraversable(true);
             PDFButton.setFocusTraversable(true);
+            mailButton.setFocusTraversable(true);
             languagePicker.setFocusTraversable(true);
             lightModeButton.setFocusTraversable(true);
             darkModeButton.setFocusTraversable(true);
             discardConfirmation.setVisible(false);
+            darkOverlay.setVisible(false);
         });
     }
 

@@ -1,2 +1,2 @@
-DisplayMode=Dark
+DisplayMode=Light
 Language=EN

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import eu.iamgio.animated.transition.AnimatedSwitcher?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
@@ -132,131 +133,116 @@
             </Text>
          </graphic>
       </Button>
+      <Rectangle fx:id="darkOverlay" arcHeight="5.0" arcWidth="5.0" fill="#0000006d" height="790.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" visible="false" width="1100.0" />
       <AnchorPane fx:id="predictionPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
          <children>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#0000006d" height="790.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1100.0" />
-            <AnchorPane layoutX="325.0" layoutY="245.0" prefHeight="300.0" prefWidth="450.0">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="300.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
-                  <Text layoutX="11.0" layoutY="29.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Pour les prochains combien d'ans voulez-vous générer des prédictions (1-100) ?" wrappingWidth="429.0">
-                     <font>
-                        <Font name="Calibri Light" size="20.0" />
-                     </font>
-                  </Text>
-                  <TextField fx:id="predictionField" layoutX="182.0" layoutY="125.0" prefHeight="50.0" prefWidth="60.0" styleClass="inputs" text="1">
-                     <font>
-                        <Font size="20.0" />
-                     </font>
-                  </TextField>
-                  <Button layoutX="242.0" layoutY="125.0" mnemonicParsing="false" onAction="#increaseValue" prefHeight="25.0" prefWidth="25.0" style="-fx-padding: 0;" styleClass="promptButtons" text="+">
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                     <font>
-                        <Font size="16.0" />
-                     </font></Button>
-                  <Button layoutX="242.0" layoutY="150.0" mnemonicParsing="false" onAction="#decreaseValue" prefHeight="25.0" prefWidth="25.0" style="-fx-padding: 0;" styleClass="promptButtons" text="-">
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                     <font>
-                        <Font size="16.0" />
-                     </font></Button>
-                  <Text fx:id="invalidNumberWarning" fill="RED" layoutX="89.0" layoutY="211.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Veuillez spécifier un numéro entre 1 et 100 !" visible="false">
-                     <font>
-                        <Font name="Calibri" size="15.0" />
-                     </font>
-                  </Text>
-                  <Button layoutX="80.0" layoutY="237.0" mnemonicParsing="false" onAction="#togglePredictionPrompt" styleClass="promptButtons" text="❌ Annuler">
-                     <font>
-                        <Font name="Calibri" size="20.0" />
-                     </font>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                  </Button>
-                  <Button layoutX="254.0" layoutY="237.0" mnemonicParsing="false" onAction="#attemptPrediction" prefHeight="37.0" prefWidth="116.0" styleClass="promptButtons" text="✅ Prédire">
-                     <font>
-                        <Font name="Calibri" size="20.0" />
-                     </font>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                  </Button>
-               </children>
-            </AnchorPane>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="300.0" layoutX="325.0" layoutY="245.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <Text layoutX="336.0" layoutY="274.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Pour les prochains combien d'ans voulez-vous générer des prédictions (1-100) ?" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="predictionField" layoutX="507.0" layoutY="370.0" prefHeight="50.0" prefWidth="60.0" styleClass="inputs" text="1">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </TextField>
+            <Button layoutX="567.0" layoutY="370.0" mnemonicParsing="false" onAction="#increaseValue" prefHeight="25.0" prefWidth="25.0" style="-fx-padding: 0;" styleClass="promptButtons" text="+">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <Button layoutX="567.0" layoutY="395.0" mnemonicParsing="false" onAction="#decreaseValue" prefHeight="25.0" prefWidth="25.0" style="-fx-padding: 0;" styleClass="promptButtons" text="-">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <Text fx:id="invalidNumberWarning" fill="RED" layoutX="414.0" layoutY="456.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Veuillez spécifier un numéro entre 1 et 100 !" visible="false">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <Button layoutX="405.0" layoutY="482.0" mnemonicParsing="false" onAction="#togglePredictionPrompt" styleClass="promptButtons" text="❌ Annuler">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
+            <Button layoutX="579.0" layoutY="482.0" mnemonicParsing="false" onAction="#attemptPrediction" prefHeight="37.0" prefWidth="116.0" styleClass="promptButtons" text="✅ Prédire">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="discardConfirmation" prefHeight="790.0" prefWidth="1100.0" visible="false">
          <children>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#0000006d" height="790.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1100.0" />
-            <AnchorPane layoutX="325.0" layoutY="311.0" prefHeight="168.0" prefWidth="450.0">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="168.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
-                  <Text layoutX="11.0" layoutY="58.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Prédictions effacées !" textAlignment="CENTER" wrappingWidth="429.0">
-                     <font>
-                        <Font name="Calibri Light" size="20.0" />
-                     </font>
-                  </Text>
-                  <Button fx:id="closeDiscardConfirmation" layoutX="188.0" layoutY="88.0" mnemonicParsing="false" styleClass="promptButtons" text="✅ OK">
-                     <font>
-                        <Font name="Calibri" size="20.0" />
-                     </font>
-                     <cursor>
-                        <Cursor fx:constant="HAND" />
-                     </cursor>
-                  </Button>
-               </children>
-            </AnchorPane>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="168.0" layoutX="325.0" layoutY="311.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <Text layoutX="336.0" layoutY="369.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Prédictions effacées !" textAlignment="CENTER" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <Button fx:id="closeDiscardConfirmation" layoutX="513.0" layoutY="399.0" mnemonicParsing="false" styleClass="promptButtons" text="✅ OK">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="backgroundOperations" prefHeight="790.0" prefWidth="1100.0" visible="false">
          <children>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#0000006d" height="790.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1100.0" />
-            <AnchorPane layoutX="325.0" layoutY="311.0" prefHeight="168.0" prefWidth="450.0">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="168.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
-                  <ImageView fx:id="loadingCircleImageView" fitHeight="75.0" fitWidth="75.0" layoutX="188.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true" />
-                  <Text layoutX="11.0" layoutY="141.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Veuillez patienter..." textAlignment="CENTER" wrappingWidth="429.0">
-                     <font>
-                        <Font name="Calibri Light" size="20.0" />
-                     </font>
-                  </Text>
-               </children>
-            </AnchorPane>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="168.0" layoutX="325.0" layoutY="311.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <ImageView fx:id="loadingCircleImageView" fitHeight="75.0" fitWidth="75.0" layoutX="513.0" layoutY="334.0" pickOnBounds="true" preserveRatio="true" />
+            <Text layoutX="336.0" layoutY="452.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Veuillez patienter..." textAlignment="CENTER" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="emailPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
          <children>
-            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#0000006d" height="790.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1100.0" />
-            <AnchorPane layoutX="325.0" layoutY="298.0" prefHeight="195.0" prefWidth="450.0">
-               <children>
-                  <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="195.0" layoutX="1.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
-                  <Text layoutX="12.0" layoutY="29.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Veuillez spécifier où envoyer le rapport" textAlignment="CENTER" wrappingWidth="429.0">
-                     <font>
-                        <Font name="Calibri Light" size="20.0" />
-                     </font>
-                  </Text>
-                  <TextField fx:id="emailField" layoutX="100.0" layoutY="59.0" prefHeight="25.0" prefWidth="237.0" styleClass="inputs" />
-                  <Text fx:id="invalidEmailWarning" fill="RED" layoutX="18.0" layoutY="103.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Format e-mail incorrect ! Veuillez si vous l'avez bien écrit, et réessayez !" visible="false" wrappingWidth="415.03125">
-                     <font>
-                        <Font name="Calibri" size="15.0" />
-                     </font>
-                  </Text>
-                  <Button layoutX="88.0" layoutY="133.0" mnemonicParsing="false" onAction="#toggleEmailPrompt" styleClass="promptButtons" text="❌ Annuler">
-                     <font>
-                        <Font name="Calibri" size="20.0" />
-                     </font>
-                  </Button>
-                  <Button layoutX="232.0" layoutY="133.0" mnemonicParsing="false" onAction="#attemptSendMail" styleClass="promptButtons" text="✅ Envoyer">
-                     <font>
-                        <Font name="Calibri" size="20.0" />
-                     </font>
-                  </Button>
-               </children>
-            </AnchorPane>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="195.0" layoutX="326.0" layoutY="298.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <Text layoutX="337.0" layoutY="327.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="Veuillez spécifier où envoyer le rapport" textAlignment="CENTER" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="emailField" layoutX="425.0" layoutY="357.0" prefHeight="25.0" prefWidth="237.0" styleClass="inputs" />
+            <Text fx:id="invalidEmailWarning" fill="RED" layoutX="343.0" layoutY="401.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Format e-mail incorrect ! Veuillez si vous l'avez bien écrit, et réessayez !" visible="false" wrappingWidth="415.03125">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <Button layoutX="413.0" layoutY="431.0" mnemonicParsing="false" onAction="#toggleEmailPrompt" styleClass="promptButtons" text="❌ Annuler">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+            </Button>
+            <Button layoutX="557.0" layoutY="431.0" mnemonicParsing="false" onAction="#attemptSendMail" styleClass="promptButtons" text="✅ Envoyer">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+            </Button>
          </children>
       </AnchorPane>
+      <AnimatedSwitcher fx:id="darkOverlayAnimator" />
+      <AnimatedSwitcher fx:id="promptAnimator" />
       <Button id="minimizeButton" layoutX="986.0" layoutY="26.0" mnemonicParsing="false" onAction="#minimizeWindow" prefHeight="50.0" prefWidth="50.0" text="—">
          <font>
             <Font name="System Bold" size="20.0" />
