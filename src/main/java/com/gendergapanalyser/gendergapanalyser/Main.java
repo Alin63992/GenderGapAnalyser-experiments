@@ -34,8 +34,10 @@ import java.util.ResourceBundle;
 
 public class Main extends Application implements Initializable {
     private static Stage currentStage;
-    public Rectangle darkOverlay;
-    public AnimatedSwitcher darkOverlayAnimator;
+    @FXML
+    private Rectangle darkOverlay;
+    @FXML
+    private AnimatedSwitcher darkOverlayAnimator;
     @FXML
     private AnimatedSwitcher promptAnimator;
     @FXML
