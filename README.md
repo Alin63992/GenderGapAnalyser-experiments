@@ -13,7 +13,7 @@ It uses JavaFX in order to have a GUI that's not cluttered and that's easy and p
 <u>02.07.2023</u><br>
 - Fixed updating the window title in the current language after changing the app language,
 so that the title doesn't stay as the one in the language the app was in when the window was opened.<br>
-- Added icons for the alerts that will be shown on the taskbar.<br>
+- Added icons that will be shown on the taskbar for the alerts.<br>
 - Changed the formulation of some code explanations.<br>
 - Changed the formulation of the header text in the data inclusion confirmation box
 that appears before sending an email,
