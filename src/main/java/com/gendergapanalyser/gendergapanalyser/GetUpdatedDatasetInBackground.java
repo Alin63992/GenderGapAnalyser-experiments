@@ -92,6 +92,13 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                     refreshInfo.initStyle(StageStyle.UNDECORATED);
                     refreshInfo.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                     refreshInfo.getDialogPane().getStyleClass().add("alerts");
+                    //Setting the alert icon
+                    // that's going to be shown on the taskbar to the Information free icon created by Anggara,
+                    // published on the flaticon website
+                    // (https://www.flaticon.com/free-icon/information_9195785)
+                    try {
+                        ((Stage)refreshInfo.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/information.png")));
+                    } catch (FileNotFoundException ignored) {}
                     //Replacing the current window with a new one containing the main menu screen
                     Stage mainMenu = new Stage();
                     mainMenu.initStyle(StageStyle.UNDECORATED);
@@ -134,6 +141,13 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                 errorDownload.initStyle(StageStyle.UNDECORATED);
                 errorDownload.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                 errorDownload.getDialogPane().getStyleClass().add("alerts");
+                //Setting the alert icon
+                // that's going to be shown on the taskbar to the Close free icon created by Alfredo Hernandez,
+                // published on the flaticon website
+                // (https://www.flaticon.com/free-icon/close_463612)
+                try {
+                    ((Stage)errorDownload.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/close.png")));
+                } catch (FileNotFoundException ignored) {}
                 errorDownload.show();
             });
         }

@@ -10,6 +10,20 @@ It uses JavaFX in order to have a GUI that's not cluttered and that's easy and p
 ### Changelog
 <ul>
 <li>
+<u>02.07.2023</u><br>
+- Fixed updating the window title in the current language after changing the app language,
+so that the title doesn't stay as the one in the language the app was in when the window was opened.<br>
+- Added icons for the alerts that will be shown on the taskbar.<br>
+- Changed the formulation of some code explanations.<br>
+- Changed the formulation of the header text in the data inclusion confirmation box
+that appears before sending an email,
+from "user data/détails d'utilisateur/datelor utilizatorului"
+to "validation data/détails de validation/datelor de validare".
+In the same box,
+also changed part of the content text in all languages to reflect the change from user data to validation data.
+</li>
+<br>
+<li>
 <u>01.07.2023</u><br>
 - Separated the dark overlay from the main menu prompt/confirmation/waiting boxes,
 and now there's only one in the whole menu.

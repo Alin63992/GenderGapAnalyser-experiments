@@ -87,7 +87,10 @@ public class DisplayEvolutionGraph implements Initializable {
         Main.setCurrentStage(mainMenu);
         switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
         switchTheme.init();
-        //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
+        //Setting the app icon
+        // that's going to be shown on the taskbar to the Gender Fluid free icon created by Vitaly Gorbachev,
+        // published on the flaticon website
+        // (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         Main.getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
 
@@ -437,6 +440,8 @@ public class DisplayEvolutionGraph implements Initializable {
                 Main.processData.changedLanguage = true;
                 Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("DisplayEvolutionGraph-" + Main.languagesShort[newValue.intValue()] + ".fxml")).load()));
                 Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                //Changing the title of the current stage
+                Main.getCurrentStage().setTitle(Main.language.equals("EN") ? "Evolution Graph" : Main.language.equals("FR") ? "Graphe d'Évolution" : "Grafic de Evoluție");
                 switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
                 switchTheme.init();
             } catch (IOException ignored) {}

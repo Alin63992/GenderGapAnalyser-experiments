@@ -179,7 +179,10 @@ public class Main extends Application implements Initializable {
         setCurrentStage(graphStage);
         switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
         switchTheme.init();
-        //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
+        //Setting the app icon
+        // that's going to be shown on the taskbar to the Gender Fluid free icon created by Vitaly Gorbachev,
+        // published on the flaticon website
+        // (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
 
@@ -201,7 +204,10 @@ public class Main extends Application implements Initializable {
         setCurrentStage(analysisStage);
         switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
         switchTheme.init();
-        //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
+        //Setting the app icon
+        // that's going to be shown on the taskbar to the Gender Fluid free icon created by Vitaly Gorbachev,
+        // published on the flaticon website
+        // (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
         getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
     }
 
@@ -416,6 +422,13 @@ public class Main extends Application implements Initializable {
                 errorSendingEmail.initStyle(StageStyle.UNDECORATED);
                 errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                 errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
+                //Setting the alert icon
+                // that's going to be shown on the taskbar to the Close free icon created by Alfredo Hernandez,
+                // published on the flaticon website
+                // (https://www.flaticon.com/free-icon/close_463612)
+                try {
+                    ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/close.png")));
+                } catch (FileNotFoundException ignored) {}
                 errorSendingEmail.show();
             }
         }
@@ -430,8 +443,8 @@ public class Main extends Application implements Initializable {
             emailPrompt.setVisible(false);
             darkOverlay.setVisible(false);
             Alert confirmInclusionOfUserData = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmInclusionOfUserData.setTitle(language.equals("EN") ? "Inclusion of user data" : language.equals("FR") ? "Inclusion des détails d'utilisateur" : "Includerea datelor utilizatorului");
-            confirmInclusionOfUserData.setHeaderText(language.equals("EN") ? "The data below will be attached to the email containing the report. They are data taken from this computer and are used to help you match the data in the email and ensure they don't come from another computer, and they won't be stored anywhere other than in the email.\nDo you agree with the inclusion of said data and have the report sent?" : language.equals("FR") ? "Les données ci-dessous vont être attachées au courriel contenant le rapport. Ils sont des données provenant de cet ordinateur, et sont utilisées pour vous aider vérifier que le courriel vient d'ici et pas d'un autre ordinateur.\nÊtes-vous d'accord avec l'inclusion de ces données et avec l'envoi du rapport?" : "Detaliile de mai jos vor fi incluse în mail. Ele sunt folosite pentru a vă ajuta să vă asigurați că mail-ul vine de aici și nu de pe alt calculator.\nSunteți de acord cu includerea acestor date și trimiterea raportului?");
+            confirmInclusionOfUserData.setTitle(language.equals("EN") ? "Inclusion of validation data" : language.equals("FR") ? "Inclusion des détails de validation" : "Includerea datelor de validare");
+            confirmInclusionOfUserData.setHeaderText(language.equals("EN") ? "The data below will be attached to the email containing the report. They are data about this computer and are used to help you match the data in the email and ensure they don't come from another computer, and they won't be stored anywhere other than in the email.\nDo you agree with the inclusion of said data and have the report sent?" : language.equals("FR") ? "Les données ci-dessous vont être attachées au courriel contenant le rapport. Ils sont des données à propos de cet ordinateur, et sont utilisées pour vous aider vérifier que le courriel vient d'ici et pas d'un autre ordinateur.\nÊtes-vous d'accord avec l'inclusion de ces données et avec l'envoi du rapport?" : "Detaliile de mai jos vor fi incluse în mail. Ele sunt folosite pentru a vă ajuta să vă asigurați că mail-ul vine de aici și nu de pe alt calculator.\nSunteți de acord cu includerea acestor date și trimiterea raportului?");
             switch (language) {
                 case "EN" -> confirmInclusionOfUserData.setContentText("Username: " + System.getProperty("user.name") + "\nOperating System: " + System.getProperty("os.name") + "\nTimezone: " + System.getProperty("user.timezone"));
                 case "FR" -> confirmInclusionOfUserData.setContentText("Nom d'utilisateur: " + System.getProperty("user.name") + "\nSystème d'exploitation: " + System.getProperty("os.name") + "\nFuseau horaire: " + System.getProperty("user.timezone"));
@@ -446,6 +459,13 @@ public class Main extends Application implements Initializable {
             confirmInclusionOfUserData.initStyle(StageStyle.UNDECORATED);
             confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
             confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
+            //Setting the alert icon
+            // that's going to be shown on the taskbar to the Question free icon created by Roundicons,
+            // published on the flaticon website
+            // (https://www.flaticon.com/free-icon/question_189665?term=question&page=1&position=11&origin=search&related_id=189665)
+            try {
+                ((Stage)confirmInclusionOfUserData.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/question.png")));
+            } catch (FileNotFoundException ignored) {}
             Optional<ButtonType> confirmationResult = confirmInclusionOfUserData.showAndWait();
             if (confirmationResult.isPresent() && confirmationResult.get() == yesButton) {
                 FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
@@ -498,7 +518,7 @@ public class Main extends Application implements Initializable {
             switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
             switchTheme.init();
 
-            //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
+            //Setting the app icon that's going to be shown on the taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
             getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
 
             //Setting the window title
@@ -555,6 +575,9 @@ public class Main extends Application implements Initializable {
                 //Reloading the main menu screen so that it uses the new language
                 getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + languagesShort[newValue.intValue()] + ".fxml")).load()));
                 getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
+                //Changing the title of the current stage
+                getCurrentStage().setTitle(language.equals("EN") ? "Main Menu" : language.equals("FR") ? "Menu Principal" : "Meniu Principal");
+                //Setting up the transition for switching themes
                 switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
                 switchTheme.init();
             } catch (IOException ignored) {}

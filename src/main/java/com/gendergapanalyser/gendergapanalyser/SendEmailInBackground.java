@@ -5,11 +5,15 @@ import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.commons.mail.EmailAttachment;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.MultiPartEmail;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -71,6 +75,13 @@ public class SendEmailInBackground implements Runnable {
                 //If the application is set to dark mode, the alert is dark too
                 emailSent.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                 emailSent.getDialogPane().getStyleClass().add("alerts");
+                //Setting the alert icon
+                // that's going to be shown on the taskbar to the Information free icon created by Anggara,
+                // published on the flaticon website
+                // (https://www.flaticon.com/free-icon/information_9195785)
+                try {
+                    ((Stage)emailSent.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/information.png")));
+                } catch (FileNotFoundException ignored) {}
 
                 //Reloading the main menu screen so the wait screen is removed and the menu is usable again
                 try {
@@ -90,6 +101,13 @@ public class SendEmailInBackground implements Runnable {
                 errorSendingEmail.initStyle(StageStyle.UNDECORATED);
                 errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                 errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
+                //Setting the alert icon
+                // that's going to be shown on the taskbar to the Close free icon created by Alfredo Hernandez,
+                // published on the flaticon website
+                // (https://www.flaticon.com/free-icon/close_463612)
+                try {
+                    ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/close.png")));
+                } catch (FileNotFoundException ignored) {}
                 try {
                     Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
                     Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
