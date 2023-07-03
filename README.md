@@ -10,6 +10,22 @@ It uses JavaFX in order to have a GUI that's not cluttered and that's easy and p
 ### Changelog
 <ul>
 <li>
+<u>04.07.2023</u><br>
+- Fixed a bug
+that was allowing the user
+to set the lower limit of the interval as a year that is beyond the lower limit of the dataset through the text field,
+and the app would generate a graph beginning with the specified year.<br>
+- Removed the programming of the "See graph for this range"
+button from the <b>initialize()</b> function and moved everything into the new <b>processRange()</b> function which is
+bound to the button in the <b>DisplayEvolutionGraph</b> files, to follow the model of setting up the buttons in the app
+like it is in the rest of the app, through functions and not through the <b>setOnAction()</b> method.<br>
+- Removed the fx:id of the "See graph for this range"
+button on the <b>DisplayEvolutionGraph</b> files, since it is no longer needed.<br>
+- Applied the previous 2 changed to the OK button in the "Predictions discarded"
+prompt boxes in the <b>MainMenu</b> files.
+</li>
+<br>
+<li>
 <u>02.07.2023</u><br>
 - Fixed updating the window title in the current language after changing the app language,
 so that the title doesn't stay as the one in the language the app was in when the window was opened.<br>

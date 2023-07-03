@@ -17,7 +17,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -52,8 +51,6 @@ public class DisplayEvolutionGraph implements Initializable {
     private TextField maximumRangeInput;
     @FXML
     private RangeSlider rangeSlider;
-    @FXML
-    private Button processRange;
     @FXML
     private ToggleButton showPayGapToggle;
     @FXML
@@ -411,6 +408,79 @@ public class DisplayEvolutionGraph implements Initializable {
         Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
     }
 
+    @FXML
+    private void processRange() {
+        try {
+            if (Integer.parseInt(minimumRangeInput.getText()) < Integer.parseInt(Main.processData.dataset[0][1])) {
+                minimumRangeInput.setText(Main.processData.dataset[0][1]);
+                rangeSlider.setLowValue(Double.parseDouble(minimumRangeInput.getText()));
+            }
+            if (Integer.parseInt(maximumRangeInput.getText()) > Integer.parseInt(Main.processData.predictionsGenerated ? Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1] : Main.processData.dataset[Main.processData.dataset.length - 1][1])) {
+                maximumRangeInput.setText(includePredictionsToggle.isSelected() ? Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1] : Main.processData.dataset[Main.processData.dataset.length - 1][1]);
+                rangeSlider.setHighValue(Double.parseDouble(maximumRangeInput.getText()));
+            }
+            if (Integer.parseInt(minimumRangeInput.getText()) < (int) rangeSlider.getHighValue())
+                rangeSlider.setLowValue(Double.parseDouble(minimumRangeInput.getText()));
+            else {
+                minimumRangeInput.setText(String.valueOf((int) rangeSlider.getHighValue() - 1));
+                rangeSlider.setLowValue(rangeSlider.getHighValue() - 1);
+            }
+            if (Integer.parseInt(maximumRangeInput.getText()) > (int) rangeSlider.getLowValue())
+                rangeSlider.setHighValue(Double.parseDouble(maximumRangeInput.getText()));
+            else {
+                maximumRangeInput.setText(String.valueOf((int) rangeSlider.getLowValue() + 1));
+                rangeSlider.setHighValue(rangeSlider.getLowValue() + 1);
+            }
+            if (!minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) || !maximumRangeInput.getText().equals(Main.processData.predictionsGenerated ? Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1] : Main.processData.dataset[Main.processData.dataset.length - 1][1])) {
+                if (Main.processData.predictionsGenerated && includePredictionsToggle.isSelected())
+                    Main.processData.createSalaryGraphWithinRangeWithPredictionsForEverybody(Integer.parseInt(minimumRangeInput.getText()), Integer.parseInt(maximumRangeInput.getText()));
+                else
+                    Main.processData.createSalaryGraphWithinRangeForEverybody(Integer.parseInt(minimumRangeInput.getText()), Integer.parseInt(maximumRangeInput.getText()));
+            }
+
+            //Updating the chart view with the updated graphs
+            FileInputStream graph = null;
+            if (changeGraph.getSelectionModel().getSelectedIndex() == 0 && showPayGapToggle.isSelected()) {
+                if (includePredictionsToggle.isSelected())
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction-range.png");
+                else
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-range.png");
+            }
+            else if (changeGraph.getSelectionModel().getSelectedIndex() == 0 && !showPayGapToggle.isSelected()) {
+                if (includePredictionsToggle.isSelected())
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-prediction-range.png");
+                else
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-range.png");
+            }
+            else if (changeGraph.getSelectionModel().getSelectedIndex() == 1) {
+                if (includePredictionsToggle.isSelected())
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men-prediction-range.png");
+                else
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men-range.png");
+            }
+            else if (changeGraph.getSelectionModel().getSelectedIndex() == 2) {
+                if (includePredictionsToggle.isSelected())
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women-prediction-range.png");
+                else
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women-range.png");
+            }
+            else if (changeGraph.getSelectionModel().getSelectedIndex() == 3) {
+                if (includePredictionsToggle.isSelected())
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap-prediction-range.png");
+                else
+                    graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap-range.png");
+            }
+            chartImageView.setImage(new Image(graph));
+            graph.close();
+        }
+        catch (NumberFormatException e) {
+            minimumRangeInput.setText(String.valueOf((int) rangeSlider.getLowValue()));
+            maximumRangeInput.setText(String.valueOf((int) rangeSlider.getHighValue()));
+            processRange();
+        }
+        catch (IOException ignored) {}
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         titleBar.setOnMousePressed(event -> {
@@ -656,77 +726,14 @@ public class DisplayEvolutionGraph implements Initializable {
                 maximumRangeInput.setText(String.valueOf((int) rangeSlider.getLowValue() + 1));
             }
         }));
-        processRange.setOnAction(action -> {
-            try {
-                if (Integer.parseInt(minimumRangeInput.getText()) < (int) rangeSlider.getHighValue())
-                    rangeSlider.setLowValue(Double.parseDouble(minimumRangeInput.getText()));
-                else {
-                    minimumRangeInput.setText(String.valueOf((int) rangeSlider.getHighValue() - 1));
-                    rangeSlider.setLowValue(rangeSlider.getHighValue() - 1);
-                }
-
-                if (Integer.parseInt(maximumRangeInput.getText()) > (int) rangeSlider.getLowValue())
-                    rangeSlider.setHighValue(Double.parseDouble(maximumRangeInput.getText()));
-                else {
-                    maximumRangeInput.setText(String.valueOf((int) rangeSlider.getLowValue() + 1));
-                    rangeSlider.setHighValue(rangeSlider.getLowValue() + 1);
-                }
-                if (!minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) || !maximumRangeInput.getText().equals(Main.processData.predictionsGenerated ? Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1] : Main.processData.dataset[Main.processData.dataset.length - 1][1])) {
-                    if (Main.processData.predictionsGenerated && includePredictionsToggle.isSelected())
-                        Main.processData.createSalaryGraphWithinRangeWithPredictionsForEverybody(Integer.parseInt(minimumRangeInput.getText()), Integer.parseInt(maximumRangeInput.getText()));
-                    else
-                        Main.processData.createSalaryGraphWithinRangeForEverybody(Integer.parseInt(minimumRangeInput.getText()), Integer.parseInt(maximumRangeInput.getText()));
-                }
-
-                //Updating the chart view with the updated graphs
-                FileInputStream graph = null;
-                if (changeGraph.getSelectionModel().getSelectedIndex() == 0 && showPayGapToggle.isSelected()) {
-                    if (includePredictionsToggle.isSelected())
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-prediction-range.png");
-                    else
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-wageGap-range.png");
-                }
-                else if (changeGraph.getSelectionModel().getSelectedIndex() == 0 && !showPayGapToggle.isSelected()) {
-                    if (includePredictionsToggle.isSelected())
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-prediction-range.png");
-                    else
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/all_genders-range.png");
-                }
-                else if (changeGraph.getSelectionModel().getSelectedIndex() == 1) {
-                    if (includePredictionsToggle.isSelected())
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men-prediction-range.png");
-                    else
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/men-range.png");
-                }
-                else if (changeGraph.getSelectionModel().getSelectedIndex() == 2) {
-                    if (includePredictionsToggle.isSelected())
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women-prediction-range.png");
-                    else
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/women-range.png");
-                }
-                else if (changeGraph.getSelectionModel().getSelectedIndex() == 3) {
-                    if (includePredictionsToggle.isSelected())
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.datasetWithPredictions[0][1]) && maximumRangeInput.getText().equals(Main.processData.datasetWithPredictions[Main.processData.datasetWithPredictions.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap-prediction.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap-prediction-range.png");
-                    else
-                        graph = new FileInputStream(minimumRangeInput.getText().equals(Main.processData.dataset[0][1]) && maximumRangeInput.getText().equals(Main.processData.dataset[Main.processData.dataset.length - 1][1]) ? "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap.png" : "src/main/resources/com/gendergapanalyser/gendergapanalyser/Graphs/wageGap-range.png");
-                }
-                chartImageView.setImage(new Image(graph));
-                graph.close();
-            }
-            catch (NumberFormatException e) {
-                minimumRangeInput.setText(String.valueOf((int) rangeSlider.getLowValue()));
-                maximumRangeInput.setText(String.valueOf((int) rangeSlider.getHighValue()));
-            }
-            catch (IOException ignored) {}
-        });
-        minimumRangeInput.setOnKeyReleased(action -> {
+        /*minimumRangeInput.setOnKeyReleased(action -> {
             if (action.getCode() == KeyCode.ENTER)
                 processRange.fire();
         });
         maximumRangeInput.setOnKeyReleased(action -> {
             if (action.getCode() == KeyCode.ENTER)
                 processRange.fire();
-        });
+        });*/
 
         //If the user generated predictions, we enable the prediction controls. If not, we disable them. We also select the include predictions checkbox and execute the togglePredictions function
         predictionControls.setDisable(!Main.processData.predictionsGenerated);

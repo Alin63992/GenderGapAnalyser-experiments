@@ -87,7 +87,7 @@
             <Font name="Calibri" size="15.0" />
          </font>
       </TextField>
-      <Button fx:id="processRange" layoutX="819.0" layoutY="707.0" mnemonicParsing="false" styleClass="promptButtons" text="Voir le graphe pour cet intervalle">
+      <Button layoutX="819.0" layoutY="707.0" mnemonicParsing="false" onAction="#processRange" styleClass="promptButtons" text="Voir le graphe pour cet intervalle">
          <font>
             <Font name="Calibri" size="15.0" />
          </font>

@@ -481,6 +481,20 @@ public class Main extends Application implements Initializable {
         else invalidEmailWarning.setVisible(true);
     }
 
+    @FXML
+    private void closeDiscardConfirmation() {
+        predictButton.setFocusTraversable(true);
+        graphsButton.setFocusTraversable(true);
+        analysisButton.setFocusTraversable(true);
+        PDFButton.setFocusTraversable(true);
+        mailButton.setFocusTraversable(true);
+        languagePicker.setFocusTraversable(true);
+        lightModeButton.setFocusTraversable(true);
+        darkModeButton.setFocusTraversable(true);
+        discardConfirmation.setVisible(false);
+        darkOverlay.setVisible(false);
+    }
+
     @Override
     public void start(Stage primaryStage) {
         try {
@@ -530,8 +544,7 @@ public class Main extends Application implements Initializable {
 
             //Opening the window
             getCurrentStage().show();
-        } catch (IOException ignored) {
-        }
+        } catch (IOException ignored) {}
     }
 
     @Override
@@ -585,20 +598,6 @@ public class Main extends Application implements Initializable {
 
         //Displaying the discard predictions button if the user generated predictions
         discardPredictionsButton.setVisible(processData.predictionsGenerated);
-
-        //Setting the button that closes the predictions discarded confirmation box to reload the main menu on click
-        closeDiscardConfirmation.setOnAction(action -> {
-            predictButton.setFocusTraversable(true);
-            graphsButton.setFocusTraversable(true);
-            analysisButton.setFocusTraversable(true);
-            PDFButton.setFocusTraversable(true);
-            mailButton.setFocusTraversable(true);
-            languagePicker.setFocusTraversable(true);
-            lightModeButton.setFocusTraversable(true);
-            darkModeButton.setFocusTraversable(true);
-            discardConfirmation.setVisible(false);
-            darkOverlay.setVisible(false);
-        });
     }
 
     //Launch time!

@@ -194,7 +194,7 @@
                   <Font name="Calibri Light" size="20.0" />
                </font>
             </Text>
-            <Button fx:id="closeDiscardConfirmation" layoutX="513.0" layoutY="399.0" mnemonicParsing="false" styleClass="promptButtons" text="✅ OK">
+            <Button layoutX="513.0" layoutY="399.0" mnemonicParsing="false" onAction="#closeDiscardConfirmation" styleClass="promptButtons" text="✅ OK">
                <font>
                   <Font name="Calibri" size="20.0" />
                </font>
