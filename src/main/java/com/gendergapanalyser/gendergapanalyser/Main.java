@@ -35,6 +35,14 @@ import java.util.ResourceBundle;
 public class Main extends Application implements Initializable {
     private static Stage currentStage;
     @FXML
+    private AnchorPane missingOutgoingCredentialsPrompt;
+    @FXML
+    private TextField outgoingEmailField;
+    @FXML
+    private PasswordField outgoingPasswordField;
+    @FXML
+    private Text invalidOutgoingEmailWarning;
+    @FXML
     private Rectangle darkOverlay;
     @FXML
     private AnimatedSwitcher darkOverlayAnimator;
@@ -67,8 +75,6 @@ public class Main extends Application implements Initializable {
     @FXML
     private Button graphsButton;
     @FXML
-    private Button closeDiscardConfirmation;
-    @FXML
     private Button analysisButton;
     @FXML
     private Button predictButton;
@@ -90,7 +96,8 @@ public class Main extends Application implements Initializable {
     private static final Thread downloadDataset = new Thread(new GetUpdatedDatasetInBackground());
     protected static int predictionValue = 0;
     protected static String email = "";
-    protected static boolean connectError = false;
+    protected static String outgoingAccountEmail = "";
+    protected static String outgoingAccountPassword = "";
     private AnimatedThemeSwitcher switchTheme;
 
     //Function used to set the currently open window to be used in the future
@@ -327,8 +334,6 @@ public class Main extends Application implements Initializable {
             //Showing the prompt
             predictionPrompt.setVisible(true);
             darkOverlay.setVisible(true);
-            //Setting the focus on the prediction input field
-            predictionField.requestFocus();
         }
     }
 
@@ -342,8 +347,10 @@ public class Main extends Application implements Initializable {
                 FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
                 loadingCircleImageView.setImage(new Image(image));
                 image.close();
-                promptAnimator.setChild(backgroundOperations);
+                promptAnimator.setChild(new Pane(backgroundOperations));
+                darkOverlayAnimator.setChild(new Pane(darkOverlay));
                 backgroundOperations.setVisible(true);
+                darkOverlay.setVisible(true);
                 new Thread(new PredictInBackground()).start();
             } else invalidNumberWarning.setVisible(true);
         } catch (NumberFormatException e) {
@@ -365,8 +372,7 @@ public class Main extends Application implements Initializable {
         darkModeButton.setFocusTraversable(false);
         discardPredictionsButton.setVisible(false);
         promptAnimator.setChild(discardConfirmation);
-        if (darkOverlayAnimator.getChild() == null)
-            darkOverlayAnimator.setChild(darkOverlay);
+        darkOverlayAnimator.setChild(darkOverlay);
         discardConfirmation.setVisible(true);
         darkOverlay.setVisible(true);
     }
@@ -374,15 +380,21 @@ public class Main extends Application implements Initializable {
     //Function used to hide or show the prompt which asks the user for the period of time they need wage prediction for
     @FXML
     private void toggleEmailPrompt() {
-        //If the prompt is visible
-        if (emailPrompt.isVisible()) {
+        //If the email prompt or the missing outgoing credentials prompt is visible
+        if (emailPrompt.isVisible() || missingOutgoingCredentialsPrompt.isVisible()) {
             promptAnimator.setChild(null);
             darkOverlayAnimator.setChild(null);
             //We hide the prompt
-            emailPrompt.setVisible(false);
+            if (emailPrompt.isVisible()) {
+                emailPrompt.setVisible(false);
+            }
+            else {
+                missingOutgoingCredentialsPrompt.setVisible(false);
+            }
             darkOverlay.setVisible(false);
             //We hide the invalid number warning
             invalidEmailWarning.setVisible(false);
+            invalidOutgoingEmailWarning.setVisible(false);
             //We set the 4 buttons on the main menu, the language picker and the display mode toggle on the menu bar to be selectable using the tab/arrow keys
             predictButton.setFocusTraversable(true);
             graphsButton.setFocusTraversable(true);
@@ -393,9 +405,25 @@ public class Main extends Application implements Initializable {
             lightModeButton.setFocusTraversable(true);
             darkModeButton.setFocusTraversable(true);
         }
-        //If the prompt is hidden
+        //If the prompts are hidden
         else {
-            if (!connectError) {
+            if (Main.outgoingAccountEmail.equals("") || Main.outgoingAccountPassword.equals("")) {
+                promptAnimator.setChild(new Pane(missingOutgoingCredentialsPrompt));
+                darkOverlayAnimator.setChild(new Pane(darkOverlay));
+                //Setting the 4 main menu buttons, the language picker and the display mode toggle on the menu bar to not be accessible with tab/arrow keys
+                predictButton.setFocusTraversable(false);
+                graphsButton.setFocusTraversable(false);
+                analysisButton.setFocusTraversable(false);
+                PDFButton.setFocusTraversable(false);
+                mailButton.setFocusTraversable(false);
+                languagePicker.setFocusTraversable(false);
+                lightModeButton.setFocusTraversable(false);
+                darkModeButton.setFocusTraversable(false);
+                //Showing the prompt
+                missingOutgoingCredentialsPrompt.setVisible(true);
+                darkOverlay.setVisible(true);
+            }
+            else {
                 promptAnimator.setChild(new Pane(emailPrompt));
                 darkOverlayAnimator.setChild(new Pane(darkOverlay));
                 //Setting the 4 main menu buttons, the language picker and the display mode toggle on the menu bar to not be accessible with tab/arrow keys
@@ -410,26 +438,8 @@ public class Main extends Application implements Initializable {
                 //Showing the prompt
                 emailPrompt.setVisible(true);
                 darkOverlay.setVisible(true);
-                //Setting the focus on the prediction input field
+                //Setting the value of the email field to the email address saved from a previous attempt
                 if (!email.equals("")) emailField.setText(email);
-                emailField.requestFocus();
-            }
-            else {
-                Alert errorSendingEmail = new Alert(Alert.AlertType.ERROR);
-                errorSendingEmail.setTitle(Main.language.equals("EN") ? "No internet connection" : Main.language.equals("FR") ? "Pas de connexion internet" : "Fără conexiune internet");
-                errorSendingEmail.setHeaderText(Main.language.equals("EN") ? "The report couldn't be sent!\nPlease check your internet connection, or wait for a bit then try again!" : Main.language.equals("FR") ? "Le rapport n'a pas pu être envoyé !\nVeuillez vérifier votre connexion internet, ou attendez un peu et réessayez !" : "Raportul nu a putut fi trimis!\nVă rugăm verificați conexiunea la internet, sau așteptați puțin si reîncercați!");
-                errorSendingEmail.getDialogPane().setMaxWidth(750);
-                errorSendingEmail.initStyle(StageStyle.UNDECORATED);
-                errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-                errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
-                //Setting the alert icon
-                // that's going to be shown on the taskbar to the Close free icon created by Alfredo Hernandez,
-                // published on the flaticon website
-                // (https://www.flaticon.com/free-icon/close_463612)
-                try {
-                    ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/close.png")));
-                } catch (FileNotFoundException ignored) {}
-                errorSendingEmail.show();
             }
         }
     }
@@ -437,48 +447,99 @@ public class Main extends Application implements Initializable {
     @FXML
     private void attemptSendMail() throws IOException {
         EmailValidator validator = EmailValidator.getInstance();
-        if (validator.isValid(emailField.getText())) {
-            invalidEmailWarning.setVisible(false);
-            email = emailField.getText();
-            emailPrompt.setVisible(false);
-            darkOverlay.setVisible(false);
-            Alert confirmInclusionOfUserData = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmInclusionOfUserData.setTitle(language.equals("EN") ? "Inclusion of validation data" : language.equals("FR") ? "Inclusion des détails de validation" : "Includerea datelor de validare");
-            confirmInclusionOfUserData.setHeaderText(language.equals("EN") ? "The data below will be attached to the email containing the report. They are data about this computer and are used to help you match the data in the email and ensure they don't come from another computer, and they won't be stored anywhere other than in the email.\nDo you agree with the inclusion of said data and have the report sent?" : language.equals("FR") ? "Les données ci-dessous vont être attachées au courriel contenant le rapport. Ils sont des données à propos de cet ordinateur, et sont utilisées pour vous aider vérifier que le courriel vient d'ici et pas d'un autre ordinateur.\nÊtes-vous d'accord avec l'inclusion de ces données et avec l'envoi du rapport?" : "Detaliile de mai jos vor fi incluse în mail. Ele sunt folosite pentru a vă ajuta să vă asigurați că mail-ul vine de aici și nu de pe alt calculator.\nSunteți de acord cu includerea acestor date și trimiterea raportului?");
-            switch (language) {
-                case "EN" -> confirmInclusionOfUserData.setContentText("Username: " + System.getProperty("user.name") + "\nOperating System: " + System.getProperty("os.name") + "\nTimezone: " + System.getProperty("user.timezone"));
-                case "FR" -> confirmInclusionOfUserData.setContentText("Nom d'utilisateur: " + System.getProperty("user.name") + "\nSystème d'exploitation: " + System.getProperty("os.name") + "\nFuseau horaire: " + System.getProperty("user.timezone"));
-                case "RO" -> confirmInclusionOfUserData.setContentText("Nume de utilizator: " + System.getProperty("user.name") + "\nSistem de Operare: " + System.getProperty("os.name") + "\nFus orar: " + System.getProperty("user.timezone"));
-            }
-            ButtonType yesButton = new ButtonType(language.equals("EN") ? "Yes" : language.equals("FR") ? "Oui" : "Da", ButtonBar.ButtonData.YES);
-            ButtonType noButton = new ButtonType(language.equals("EN") ? "No" : language.equals("FR") ? "Non" : "Nu", ButtonBar.ButtonData.NO);
-            confirmInclusionOfUserData.getButtonTypes().clear();
-            confirmInclusionOfUserData.getButtonTypes().add(yesButton);
-            confirmInclusionOfUserData.getButtonTypes().add(noButton);
-            confirmInclusionOfUserData.getDialogPane().setMaxWidth(750);
-            confirmInclusionOfUserData.initStyle(StageStyle.UNDECORATED);
-            confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-            confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
-            //Setting the alert icon
-            // that's going to be shown on the taskbar to the Question free icon created by Roundicons,
-            // published on the flaticon website
-            // (https://www.flaticon.com/free-icon/question_189665?term=question&page=1&position=11&origin=search&related_id=189665)
-            try {
-                ((Stage)confirmInclusionOfUserData.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/question.png")));
-            } catch (FileNotFoundException ignored) {}
-            Optional<ButtonType> confirmationResult = confirmInclusionOfUserData.showAndWait();
-            if (confirmationResult.isPresent() && confirmationResult.get() == yesButton) {
-                FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
-                loadingCircleImageView.setImage(new Image(image));
-                image.close();
-                promptAnimator.setChild(new Pane(backgroundOperations));
-                darkOverlayAnimator.setChild(new Pane(darkOverlay));
-                backgroundOperations.setVisible(true);
-                darkOverlay.setVisible(true);
-                new Thread(new SendEmailInBackground()).start();
-            }
+        if (emailPrompt.isVisible()) {
+            if (validator.isValid(emailField.getText())) {
+                invalidEmailWarning.setVisible(false);
+                email = emailField.getText();
+                promptAnimator.setChild(null);
+                darkOverlayAnimator.setChild(null);
+                emailPrompt.setVisible(false);
+                darkOverlay.setVisible(false);
+                Alert confirmInclusionOfUserData = new Alert(Alert.AlertType.CONFIRMATION);
+                confirmInclusionOfUserData.setTitle(language.equals("EN") ? "Inclusion of validation data" : language.equals("FR") ? "Inclusion des détails de validation" : "Includerea datelor de validare");
+                confirmInclusionOfUserData.setHeaderText(language.equals("EN") ? "The data below will be attached to the email containing the report. They are data about this computer and are used to help you match the data in the email and ensure they don't come from another computer, and they won't be stored anywhere other than in the email.\nDo you agree with the inclusion of said data and have the report sent?" : language.equals("FR") ? "Les données ci-dessous vont être attachées au courriel contenant le rapport. Ils sont des données à propos de cet ordinateur, et sont utilisées pour vous aider vérifier que le courriel vient d'ici et pas d'un autre ordinateur.\nÊtes-vous d'accord avec l'inclusion de ces données et avec l'envoi du rapport?" : "Detaliile de mai jos vor fi incluse în mail. Ele sunt folosite pentru a vă ajuta să vă asigurați că mail-ul vine de aici și nu de pe alt calculator.\nSunteți de acord cu includerea acestor date și trimiterea raportului?");
+                switch (language) {
+                    case "EN" -> confirmInclusionOfUserData.setContentText("Username: " + System.getProperty("user.name") + "\nOperating System: " + System.getProperty("os.name") + "\nTimezone: " + System.getProperty("user.timezone"));
+                    case "FR" -> confirmInclusionOfUserData.setContentText("Nom d'utilisateur: " + System.getProperty("user.name") + "\nSystème d'exploitation: " + System.getProperty("os.name") + "\nFuseau horaire: " + System.getProperty("user.timezone"));
+                    case "RO" -> confirmInclusionOfUserData.setContentText("Nume de utilizator: " + System.getProperty("user.name") + "\nSistem de Operare: " + System.getProperty("os.name") + "\nFus orar: " + System.getProperty("user.timezone"));
+                }
+                ButtonType yesButton = new ButtonType(language.equals("EN") ? "Yes" : language.equals("FR") ? "Oui" : "Da", ButtonBar.ButtonData.YES);
+                ButtonType noButton = new ButtonType(language.equals("EN") ? "No" : language.equals("FR") ? "Non" : "Nu", ButtonBar.ButtonData.NO);
+                confirmInclusionOfUserData.getButtonTypes().clear();
+                confirmInclusionOfUserData.getButtonTypes().add(yesButton);
+                confirmInclusionOfUserData.getButtonTypes().add(noButton);
+                confirmInclusionOfUserData.getDialogPane().setMaxWidth(750);
+                confirmInclusionOfUserData.initStyle(StageStyle.UNDECORATED);
+                confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
+                //Setting the alert icon
+                // that's going to be shown on the taskbar to the Question free icon created by Roundicons,
+                // published on the flaticon website
+                // (https://www.flaticon.com/free-icon/question_189665?term=question&page=1&position=11&origin=search&related_id=189665)
+                try {
+                    ((Stage) confirmInclusionOfUserData.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/question.png")));
+                } catch (FileNotFoundException ignored) {
+                }
+                Optional<ButtonType> confirmationResult = confirmInclusionOfUserData.showAndWait();
+                if (confirmationResult.isPresent() && confirmationResult.get() == yesButton) {
+                    FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
+                    loadingCircleImageView.setImage(new Image(image));
+                    image.close();
+                    promptAnimator.setChild(new Pane(backgroundOperations));
+                    darkOverlayAnimator.setChild(new Pane(darkOverlay));
+                    backgroundOperations.setVisible(true);
+                    darkOverlay.setVisible(true);
+                    new Thread(new SendEmailInBackground()).start();
+                }
+            } else invalidEmailWarning.setVisible(true);
         }
-        else invalidEmailWarning.setVisible(true);
+        else if (missingOutgoingCredentialsPrompt.isVisible()) {
+            if (validator.isValid(outgoingEmailField.getText())) {
+                invalidOutgoingEmailWarning.setVisible(false);
+                email = outgoingAccountEmail = outgoingEmailField.getText();
+                outgoingAccountPassword = outgoingPasswordField.getText();
+                promptAnimator.setChild(null);
+                darkOverlayAnimator.setChild(null);
+                missingOutgoingCredentialsPrompt.setVisible(false);
+                darkOverlay.setVisible(false);
+                Alert confirmInclusionOfUserData = new Alert(Alert.AlertType.CONFIRMATION);
+                confirmInclusionOfUserData.setTitle(language.equals("EN") ? "Inclusion of validation data" : language.equals("FR") ? "Inclusion des détails de validation" : "Includerea datelor de validare");
+                confirmInclusionOfUserData.setHeaderText(language.equals("EN") ? "The data below will be attached to the email containing the report. They are data about this computer and are used to help you match the data in the email and ensure they don't come from another computer, and they won't be stored anywhere other than in the email.\nDo you agree with the inclusion of said data and have the report sent?" : language.equals("FR") ? "Les données ci-dessous vont être attachées au courriel contenant le rapport. Ils sont des données à propos de cet ordinateur, et sont utilisées pour vous aider vérifier que le courriel vient d'ici et pas d'un autre ordinateur.\nÊtes-vous d'accord avec l'inclusion de ces données et avec l'envoi du rapport?" : "Detaliile de mai jos vor fi incluse în mail. Ele sunt folosite pentru a vă ajuta să vă asigurați că mail-ul vine de aici și nu de pe alt calculator.\nSunteți de acord cu includerea acestor date și trimiterea raportului?");
+                switch (language) {
+                    case "EN" -> confirmInclusionOfUserData.setContentText("Username: " + System.getProperty("user.name") + "\nOperating System: " + System.getProperty("os.name") + "\nTimezone: " + System.getProperty("user.timezone"));
+                    case "FR" -> confirmInclusionOfUserData.setContentText("Nom d'utilisateur: " + System.getProperty("user.name") + "\nSystème d'exploitation: " + System.getProperty("os.name") + "\nFuseau horaire: " + System.getProperty("user.timezone"));
+                    case "RO" -> confirmInclusionOfUserData.setContentText("Nume de utilizator: " + System.getProperty("user.name") + "\nSistem de Operare: " + System.getProperty("os.name") + "\nFus orar: " + System.getProperty("user.timezone"));
+                }
+                ButtonType yesButton = new ButtonType(language.equals("EN") ? "Yes" : language.equals("FR") ? "Oui" : "Da", ButtonBar.ButtonData.YES);
+                ButtonType noButton = new ButtonType(language.equals("EN") ? "No" : language.equals("FR") ? "Non" : "Nu", ButtonBar.ButtonData.NO);
+                confirmInclusionOfUserData.getButtonTypes().clear();
+                confirmInclusionOfUserData.getButtonTypes().add(yesButton);
+                confirmInclusionOfUserData.getButtonTypes().add(noButton);
+                confirmInclusionOfUserData.getDialogPane().setMaxWidth(750);
+                confirmInclusionOfUserData.initStyle(StageStyle.UNDECORATED);
+                confirmInclusionOfUserData.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                confirmInclusionOfUserData.getDialogPane().getStyleClass().add("alerts");
+                //Setting the alert icon
+                // that's going to be shown on the taskbar to the Question free icon created by Roundicons,
+                // published on the flaticon website
+                // (https://www.flaticon.com/free-icon/question_189665?term=question&page=1&position=11&origin=search&related_id=189665)
+                try {
+                    ((Stage) confirmInclusionOfUserData.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/question.png")));
+                } catch (FileNotFoundException ignored) {
+                }
+                Optional<ButtonType> confirmationResult = confirmInclusionOfUserData.showAndWait();
+                if (confirmationResult.isPresent() && confirmationResult.get() == yesButton) {
+                    FileInputStream image = new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/loading-" + displayMode + ".gif");
+                    loadingCircleImageView.setImage(new Image(image));
+                    image.close();
+                    promptAnimator.setChild(new Pane(backgroundOperations));
+                    darkOverlayAnimator.setChild(new Pane(darkOverlay));
+                    backgroundOperations.setVisible(true);
+                    darkOverlay.setVisible(true);
+                    new Thread(new SendEmailInBackground()).start();
+                }
+            } else invalidOutgoingEmailWarning.setVisible(true);
+        }
     }
 
     @FXML
@@ -493,6 +554,8 @@ public class Main extends Application implements Initializable {
         darkModeButton.setFocusTraversable(true);
         discardConfirmation.setVisible(false);
         darkOverlay.setVisible(false);
+        promptAnimator.setChild(null);
+        darkOverlayAnimator.setChild(null);
     }
 
     @Override

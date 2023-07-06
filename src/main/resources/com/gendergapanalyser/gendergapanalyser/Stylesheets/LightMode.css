@@ -121,6 +121,16 @@
     -fx-cursor: hand;
 }
 
+.inputs {
+    -fx-background-color: #f3f3f3;
+    -fx-text-fill: black;
+    -fx-border-color: transparent;
+}
+.inputs:focused {
+    -fx-border-color: transparent transparent #0096c9 transparent;
+    -fx-border-width: 2;
+}
+
 .choice-box .context-menu {
     -fx-background-color: #f3f3f3;
     -fx-cursor: hand;

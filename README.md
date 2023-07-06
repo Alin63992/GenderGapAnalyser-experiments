@@ -10,6 +10,14 @@ It uses JavaFX in order to have a GUI that's not cluttered and that's easy and p
 ### Changelog
 <ul>
 <li>
+<u>07.07.2023</u><br>
+- Fixed the lack of animation on prompt opening or theme switching on the main menu
+after attempting to email the PDF report.<br>
+- Added a prompt that asks the user for an Outlook account from and to which send the PDF report,
+if the project is downloaded from Git, which misses the default email and password (English only, for now).
+</li>
+<br>
+<li>
 <u>04.07.2023</u><br>
 - Fixed a bug
 that was allowing the user

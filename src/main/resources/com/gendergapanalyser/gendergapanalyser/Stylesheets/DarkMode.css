@@ -145,11 +145,6 @@
     -fx-fill: #313131FF;
 }
 
-.inputs {
-    -fx-background-color: #232323;
-    -fx-text-fill: white;
-}
-
 .promptButtons {
     -fx-background-color: #232323;
     -fx-text-fill: white;
@@ -164,6 +159,16 @@
     -fx-background-color: #4b4b4b;
     -fx-text-fill: white;
     -fx-cursor: hand;
+}
+
+.inputs {
+    -fx-background-color: #232323;
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+}
+.inputs:focused {
+    -fx-border-color: transparent transparent #0096c9 transparent;
+    -fx-border-width: 2;
 }
 
 .choice-box .label {

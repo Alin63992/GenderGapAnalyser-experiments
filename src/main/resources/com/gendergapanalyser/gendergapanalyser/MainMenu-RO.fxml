@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -235,6 +236,33 @@
                </font>
             </Button>
             <Button layoutX="561.0" layoutY="431.0" mnemonicParsing="false" onAction="#attemptSendMail" styleClass="promptButtons" text="✅ Trimite">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+            </Button>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="missingOutgoingCredentialsPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="313.0" layoutX="207.0" layoutY="239.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="686.0" />
+            <Text layoutX="216.0" layoutY="265.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="labels" text="The outgoing mail account credentials are missing from the program, and an Outlook account is needed to send the PDF report through e-mail. Please enter your Outlook account credentials to send the report to your own e-mail address. It will show up as &quot;Note to self&quot;, and the credentials will be forgotten after attempting to send the e-mail." textAlignment="CENTER" wrappingWidth="668.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="outgoingEmailField" layoutX="432.0" layoutY="393.0" prefHeight="25.0" prefWidth="237.0" promptText="E-mail address" styleClass="inputs" />
+            <PasswordField fx:id="outgoingPasswordField" layoutX="432.0" layoutY="423.0" prefHeight="25.0" prefWidth="237.0" promptText="Password" styleClass="inputs" />
+            <Text fx:id="invalidOutgoingEmailWarning" fill="RED" layoutX="311.0" layoutY="468.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Incorrect mail format! Please check if you typed it in correctly, then try again!" visible="false" wrappingWidth="478.03125">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <Button layoutX="433.0" layoutY="496.0" mnemonicParsing="false" onAction="#toggleEmailPrompt" styleClass="promptButtons" text="❌ Cancel">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+            </Button>
+            <Button layoutX="577.0" layoutY="496.0" mnemonicParsing="false" onAction="#attemptSendMail" styleClass="promptButtons" text="✅ Send">
                <font>
                   <Font name="Calibri" size="20.0" />
                </font>

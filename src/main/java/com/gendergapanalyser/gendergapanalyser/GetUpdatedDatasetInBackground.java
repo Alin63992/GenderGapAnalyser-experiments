@@ -99,6 +99,15 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                     try {
                         ((Stage)refreshInfo.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/information.png")));
                     } catch (FileNotFoundException ignored) {}
+
+                    //Checking to see if this thread is interrupted and stopping it if it is
+                    if (Thread.currentThread().isInterrupted()) {
+                        try {
+                            Files.delete(downloadedDatasetPath);
+                        } catch (IOException ignored) {}
+                        return;
+                    }
+
                     //Replacing the current window with a new one containing the main menu screen
                     Stage mainMenu = new Stage();
                     mainMenu.initStyle(StageStyle.UNDECORATED);
@@ -125,7 +134,6 @@ public class GetUpdatedDatasetInBackground implements Runnable {
             }
         } catch (IOException e) {
             Platform.runLater(() -> {
-                Main.connectError = !e.getMessage().equals("Read timed out");
                 Alert errorDownload = new Alert(Alert.AlertType.ERROR);
                 if (Main.language.equals("EN")) {
                     errorDownload.setTitle("Failed to obtain updated information");

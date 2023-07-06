@@ -1,2 +1,2 @@
 DisplayMode=Light
-Language=EN
+Language=FR

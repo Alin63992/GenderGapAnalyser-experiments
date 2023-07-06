@@ -1,6 +1,9 @@
 package com.gendergapanalyser.gendergapanalyser;
 
+import animatefx.animation.FadeOut;
 import com.itextpdf.text.DocumentException;
+import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
+import eu.iamgio.animated.transition.Animation;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -26,10 +29,19 @@ public class SendEmailInBackground implements Runnable {
         // it was generated in a different language than the current one of the application,
         // it was generated without including the generated predictions,
         // or it includes predictions that were deleted, the report is regenerated.
-        if (!Files.exists(Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf")) || Main.processData.changedLanguage || Main.processData.predictionsGenerated && !Main.processData.PDFGeneratedWithPredictions || !Main.processData.predictionsGenerated && Main.processData.PDFGeneratedWithPredictions) {
+        Path PDFReportPath = Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf");
+        if (!Files.exists(PDFReportPath) || Main.processData.changedLanguage || Main.processData.predictionsGenerated && !Main.processData.PDFGeneratedWithPredictions || !Main.processData.predictionsGenerated && Main.processData.PDFGeneratedWithPredictions) {
             try {
                 Main.processData.createPDF();
             } catch (IOException | DocumentException ignored) {}
+        }
+
+        //Checking to see if this thread is interrupted and stopping it if it is
+        if (Thread.currentThread().isInterrupted()) {
+            try {
+                Files.delete(PDFReportPath);
+            } catch (IOException ignored) {}
+            return;
         }
 
         //Building the email attachment containing the PDF report
@@ -38,6 +50,14 @@ public class SendEmailInBackground implements Runnable {
         pdfDocument.setDisposition(EmailAttachment.ATTACHMENT);
         pdfDocument.setDescription(Main.language.equals("EN") ? "Gender equality in the United States" : Main.language.equals("FR") ? "L'égalité entre les genres dans les États-Unis" : "Egalitatea între genuri în Statele Unite");
 
+        //Checking to see if this thread is interrupted and stopping it if it is
+        if (Thread.currentThread().isInterrupted()) {
+            try {
+                Files.delete(PDFReportPath);
+            } catch (IOException ignored) {}
+            return;
+        }
+
         //Starting the email
         MultiPartEmail mail = new MultiPartEmail();
         //Setting the email server's address (using Outlook)
@@ -45,14 +65,24 @@ public class SendEmailInBackground implements Runnable {
         try {
             //Setting the name of the recipient to be the local part of the email address (before the '@' symbol)
             mail.addTo(Main.email, Main.email.split("@")[0]);
-            //Setting the sender email address
-            mail.setFrom("gender-gap-analyser@outlook.com");
             //Setting the Outlook server's SMTP port number
             mail.setSmtpPort(587);
-            //Setting the email address and the password of the email account that sends the email containing the PDF
-            mail.setAuthentication("gender-gap-analyser@outlook.com", "javagga2023");
             //Enabling TLS as required by the Outlook server
             mail.setStartTLSEnabled(true);
+            //Setting the email address and the password of the email account
+            // that sends the email containing the PDF
+            mail.setAuthentication(Main.outgoingAccountEmail, Main.outgoingAccountPassword);
+            //Setting the sender email address
+            mail.setFrom(Main.outgoingAccountEmail);
+
+            //Checking to see if this thread is interrupted and stopping it if it is
+            if (Thread.currentThread().isInterrupted()) {
+                try {
+                    Files.delete(PDFReportPath);
+                } catch (IOException ignored) {}
+                return;
+            }
+
             //Setting the subject of the email
             mail.setSubject(Main.language.equals("EN") ? "The PDF report regarding the gender equality situation in the United States" : Main.language.equals("FR") ? "Le rapport PDF regardant la situation de l'égalité entre les genres dans les États-Unis" : "Raportul PDF despre situația egalității între genuri în Statele Unite");
             //Setting the body of the email
@@ -64,6 +94,15 @@ public class SendEmailInBackground implements Runnable {
             mail.attach(pdfDocument);
             //Lift off! (Sending the email)
             mail.send();
+
+            //Checking to see if this thread is interrupted and stopping it if it is
+            if (Thread.currentThread().isInterrupted()) {
+                try {
+                    Files.delete(PDFReportPath);
+                } catch (IOException ignored) {}
+                return;
+            }
+
             //Running graphical instructions on the JavaFX thread
             Platform.runLater(() -> {
                 //Building and showing an alert that tells the user the email was sent successfully
@@ -83,14 +122,33 @@ public class SendEmailInBackground implements Runnable {
                     ((Stage)emailSent.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/information.png")));
                 } catch (FileNotFoundException ignored) {}
 
+                //Checking to see if this thread is interrupted and stopping it if it is
+                if (Thread.currentThread().isInterrupted()) {
+                    try {
+                        Files.delete(PDFReportPath);
+                    } catch (IOException ignored) {}
+                    return;
+                }
+
                 //Reloading the main menu screen so the wait screen is removed and the menu is usable again
                 try {
                     Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
                     Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+                    switchTheme.init();
                 } catch (IOException ignored) {}
                 emailSent.show();
             });
         } catch (EmailException e) {
+            e.printStackTrace();
+            //Checking to see if this thread is interrupted and stopping it if it is
+            if (Thread.currentThread().isInterrupted()) {
+                try {
+                    Files.delete(PDFReportPath);
+                } catch (IOException ignored) {}
+                return;
+            }
+
             //If there was a problem sending the email, an alert is built and shown,
             // informing a user that there was a problem and the email was not sent
             Platform.runLater(() -> {
@@ -108,12 +166,25 @@ public class SendEmailInBackground implements Runnable {
                 try {
                     ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/close.png")));
                 } catch (FileNotFoundException ignored) {}
+
+                //Checking to see if this thread is interrupted and stopping it if it is
+                if (Thread.currentThread().isInterrupted()) {
+                    try {
+                        Files.delete(PDFReportPath);
+                    } catch (IOException ignored) {}
+                    return;
+                }
+
                 try {
                     Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
                     Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+                    switchTheme.init();
                 } catch (IOException ignored) {}
                 errorSendingEmail.show();
             });
         }
+        Main.outgoingAccountEmail = "";
+        Main.outgoingAccountPassword = "";
     }
 }
