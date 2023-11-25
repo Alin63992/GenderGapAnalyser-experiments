@@ -1,7 +1,6 @@
 package com.gendergapanalyser.gendergapanalyser;
 
 import animatefx.animation.FadeOut;
-import com.itextpdf.text.DocumentException;
 import eu.iamgio.animated.transition.AnimatedThemeSwitcher;
 import eu.iamgio.animated.transition.Animation;
 import javafx.application.Platform;
@@ -30,13 +29,13 @@ public class SendEmailInBackground implements Runnable {
         // it was generated without including the generated predictions,
         // or it includes predictions that were deleted, the report is regenerated.
         Path PDFReportPath = Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf");
-        if (!Files.exists(PDFReportPath) || Main.processData.changedLanguage || Main.processData.predictionsGenerated && !Main.processData.PDFGeneratedWithPredictions || !Main.processData.predictionsGenerated && Main.processData.PDFGeneratedWithPredictions) {
+        if (!Files.exists(PDFReportPath) || Main.changedLanguage || Main.processData.predictionsGenerated && !Main.processData.PDFGeneratedWithPredictions || !Main.processData.predictionsGenerated && Main.processData.PDFGeneratedWithPredictions) {
             try {
                 Main.processData.createPDF();
-            } catch (IOException | DocumentException ignored) {}
+            } catch (IOException ignored) {}
         }
 
-        //Checking to see if this thread is interrupted and stopping it if it is
+        //Checking  if this thread is interrupted and stopping it if it is
         if (Thread.currentThread().isInterrupted()) {
             try {
                 Files.delete(PDFReportPath);
@@ -50,7 +49,7 @@ public class SendEmailInBackground implements Runnable {
         pdfDocument.setDisposition(EmailAttachment.ATTACHMENT);
         pdfDocument.setDescription(Main.language.equals("EN") ? "Gender equality in the United States" : Main.language.equals("FR") ? "L'égalité entre les genres dans les États-Unis" : "Egalitatea între genuri în Statele Unite");
 
-        //Checking to see if this thread is interrupted and stopping it if it is
+        //Checking  if this thread is interrupted and stopping it if it is
         if (Thread.currentThread().isInterrupted()) {
             try {
                 Files.delete(PDFReportPath);
@@ -75,7 +74,7 @@ public class SendEmailInBackground implements Runnable {
             //Setting the sender email address
             mail.setFrom(Main.outgoingAccountEmail);
 
-            //Checking to see if this thread is interrupted and stopping it if it is
+            //Checking  if this thread is interrupted and stopping it if it is
             if (Thread.currentThread().isInterrupted()) {
                 try {
                     Files.delete(PDFReportPath);
@@ -95,7 +94,7 @@ public class SendEmailInBackground implements Runnable {
             //Lift off! (Sending the email)
             mail.send();
 
-            //Checking to see if this thread is interrupted and stopping it if it is
+            //Checking  if this thread is interrupted and stopping it if it is
             if (Thread.currentThread().isInterrupted()) {
                 try {
                     Files.delete(PDFReportPath);
@@ -119,10 +118,10 @@ public class SendEmailInBackground implements Runnable {
                 // published on the flaticon website
                 // (https://www.flaticon.com/free-icon/information_9195785)
                 try {
-                    ((Stage)emailSent.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/information.png")));
+                    ((Stage)emailSent.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-information.png")));
                 } catch (FileNotFoundException ignored) {}
 
-                //Checking to see if this thread is interrupted and stopping it if it is
+                //Checking  if this thread is interrupted and stopping it if it is
                 if (Thread.currentThread().isInterrupted()) {
                     try {
                         Files.delete(PDFReportPath);
@@ -132,16 +131,16 @@ public class SendEmailInBackground implements Runnable {
 
                 //Reloading the main menu screen so the wait screen is removed and the menu is usable again
                 try {
-                    Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
-                    Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    Scene mainScene = new Scene(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + Main.language + ".fxml")).load());
+                    mainScene.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    Main.getCurrentStage().setScene(mainScene);
                     AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
                     switchTheme.init();
                 } catch (IOException ignored) {}
                 emailSent.show();
             });
         } catch (EmailException e) {
-            e.printStackTrace();
-            //Checking to see if this thread is interrupted and stopping it if it is
+            //Checking  if this thread is interrupted and stopping it if it is
             if (Thread.currentThread().isInterrupted()) {
                 try {
                     Files.delete(PDFReportPath);
@@ -154,8 +153,8 @@ public class SendEmailInBackground implements Runnable {
             Platform.runLater(() -> {
                 Alert errorSendingEmail = new Alert(Alert.AlertType.ERROR);
                 errorSendingEmail.setTitle(Main.language.equals("EN") ? "Report not sent" : Main.language.equals("FR") ? "Rapport non envoyé" : "Raport netrimis");
-                errorSendingEmail.setHeaderText(Main.language.equals("EN") ? "The report couldn't be sent!\nPlease check your internet connection, or wait for a bit then try again!" : Main.language.equals("FR") ? "Le rapport n'a pas pu être envoyé !\nVeuillez vérifier votre connexion internet, ou attendez un peu et réessayez !" : "Raportul nu a putut fi trimis!\nVă rugăm verificați conexiunea la internet, sau așteptați puțin si reîncercați!");
-                errorSendingEmail.getDialogPane().setMaxWidth(750);
+                errorSendingEmail.setHeaderText(Main.language.equals("EN") ? "The report couldn't be sent!\nPlease check your credentials, your internet connection, or wait for a bit then try again!" : Main.language.equals("FR") ? "Le rapport n'a pas pu être envoyé !\nVeuillez vérifier vos données d'authentification, votre connexion internet, ou attendez un peu et réessayez !" : "Raportul nu a putut fi trimis!\nVă rugăm verificați datele de autentificare, conexiunea la internet, sau așteptați puțin și reîncercați!");
+                errorSendingEmail.getDialogPane().setMaxWidth(370);
                 errorSendingEmail.initStyle(StageStyle.UNDECORATED);
                 errorSendingEmail.getDialogPane().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                 errorSendingEmail.getDialogPane().getStyleClass().add("alerts");
@@ -164,10 +163,10 @@ public class SendEmailInBackground implements Runnable {
                 // published on the flaticon website
                 // (https://www.flaticon.com/free-icon/close_463612)
                 try {
-                    ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/close.png")));
+                    ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-error.png")));
                 } catch (FileNotFoundException ignored) {}
 
-                //Checking to see if this thread is interrupted and stopping it if it is
+                //Checking  if this thread is interrupted and stopping it if it is
                 if (Thread.currentThread().isInterrupted()) {
                     try {
                         Files.delete(PDFReportPath);
@@ -176,15 +175,18 @@ public class SendEmailInBackground implements Runnable {
                 }
 
                 try {
-                    Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
-                    Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    Scene mainScene = new Scene(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + Main.language + ".fxml")).load());
+                    mainScene.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    Main.getCurrentStage().setScene(mainScene);
                     AnimatedThemeSwitcher switchTheme = new AnimatedThemeSwitcher(Main.getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
                     switchTheme.init();
                 } catch (IOException ignored) {}
                 errorSendingEmail.show();
             });
         }
-        Main.outgoingAccountEmail = "";
-        Main.outgoingAccountPassword = "";
+        if (Main.email.equals(Main.outgoingAccountEmail)) {
+            Main.outgoingAccountEmail = "";
+            Main.outgoingAccountPassword = "";
+        }
     }
 }

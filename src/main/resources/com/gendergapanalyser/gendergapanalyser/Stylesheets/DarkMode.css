@@ -6,6 +6,17 @@
     -fx-fill: #3b3b3bb8;
 }
 
+#menu-bar:hover {
+    -fx-cursor: open_hand;
+}
+#menu-bar:pressed {
+    -fx-cursor: closed_hand;
+}
+
+.hyperlink:visited {
+    -fx-text-fill: #0096c9;
+}
+
 .redButtons {
     -fx-background-color: #47474700;
     -fx-text-fill: red;
@@ -40,8 +51,12 @@
     -fx-text-fill: white;
 }
 
-.labels {
+.texts {
     -fx-fill: white;
+}
+
+.labels {
+    -fx-text-fill: white;
 }
 
 .separators {
@@ -59,16 +74,13 @@
 }
 
 #darkModeButton {
-    -fx-background-color: #3030ff;
-    -fx-text-fill: white;
+    -fx-background-color: #47474700;
 }
 #darkModeButton:hover {
-    -fx-background-color: #6868ff;
-    -fx-text-fill: white;
+    -fx-background-color: #444444;
 }
 #darkModeButton:focused {
-    -fx-background-color: #6868ff;
-    -fx-text-fill: white;
+    -fx-background-color: #444444;
 }
 
 .main-buttons {
@@ -94,19 +106,29 @@
     -fx-text-fill: green;
 }
 
-.scroll-pane {
+.analysisScrollPanes {
     -fx-padding: 10;
     -fx-background: black;
     -fx-border-color: black;
     -fx-text-fill: white;
 }
-
+.mainMenuPromptsScrollPanes {
+     -fx-padding: 10;
+     -fx-background: #313131FF;
+     -fx-border-color: #313131FF;
+     -fx-text-fill: white;
+}
 .scroll-bar:vertical {
     -fx-background-color: transparent;
 }
-
 .scroll-bar:vertical .thumb {
-    -fx-background-color: #3a383a;
+    -fx-background-color: #5b565b;
+}
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+.scroll-bar:horizontal .thumb {
+    -fx-background-color: #5b565b;
 }
 
 .table-view {
@@ -159,6 +181,61 @@
     -fx-background-color: #4b4b4b;
     -fx-text-fill: white;
     -fx-cursor: hand;
+}
+
+.split-menu-button {
+    -fx-background-color: #232323;
+}
+.split-menu-button .label {
+    -fx-background-color: #232323;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+.split-menu-button .label:hover {
+    -fx-background-color: #4b4b4b;
+}
+.split-menu-button .label:focused {
+    -fx-background-color: #4b4b4b;
+}
+.split-menu-button .arrow-button {
+    -fx-background-color: #232323;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+.split-menu-button .arrow-button:hover {
+    -fx-background-color: #4b4b4b;
+}
+.split-menu-button .arrow-button:focused {
+    -fx-background-color: #4b4b4b;
+}
+.split-menu-button .arrow {
+    -fx-background-color: white;
+}
+.split-menu-button .menu-item {
+    -fx-background-color: #232323;
+    -fx-cursor: hand;
+}
+.split-menu-button .menu-item:hover {
+    -fx-background-color: #0096c9;
+    -fx-cursor: hand;
+}
+.split-menu-button .menu-item:hover .label {
+    -fx-background-color: #0096c9;
+}
+.split-menu-button .context-menu {
+    -fx-background-color: #232323;
+}
+
+.informationToggles {
+    -fx-background-color: #313131FF;
+    -fx-text-fill: white;
+    -fx-cursor: hand;
+}
+.informationToggles:hover {
+    -fx-background-color: #3a3a3a;
+}
+.informationToggles:selected {
+    -fx-text-fill: #0096c9;
 }
 
 .inputs {

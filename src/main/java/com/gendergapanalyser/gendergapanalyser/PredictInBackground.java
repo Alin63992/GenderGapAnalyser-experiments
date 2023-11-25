@@ -27,8 +27,8 @@ public class PredictInBackground implements Runnable {
                 graphStage.initStyle(StageStyle.UNDECORATED);
                 graphStage.setTitle(Main.language.equals("EN") ? "Evolution Graph" : Main.language.equals("FR") ? "Graphe d'Évolution" : "Grafic de Evoluție");
                 try {
-                    graphStage.setScene(new Scene(new FXMLLoader(getClass().getResource("DisplayEvolutionGraph-" + Main.language + ".fxml")).load()));
-                    graphStage.getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                    graphStage.setScene(new Scene(new FXMLLoader(getClass().getResource("AppScreens/DisplayEvolutionGraph-" + Main.language + ".fxml")).load()));
+                    graphStage.getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                     graphStage.setResizable(false);
                     graphStage.centerOnScreen();
                     //Opening the new graphs window
@@ -38,7 +38,7 @@ public class PredictInBackground implements Runnable {
                     //Setting the graph window as the currently open window
                     Main.setCurrentStage(graphStage);
                     //Setting the app icon that's going to be shown on the title bar and taskbar to the Gender Fluid free icon created by Vitaly Gorbachev, published on the flaticon website (https://www.flaticon.com/free-icon/gender-fluid_3369089?term=gender&related_id=3369089)
-                    Main.getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/AppIcon.png")));
+                    Main.getCurrentStage().getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon.png")));
                 } catch (IOException ignored) {}
             });
         } catch (IOException ignored) {}

@@ -1,6 +1,5 @@
 package com.gendergapanalyser.gendergapanalyser;
 
-import com.itextpdf.text.DocumentException;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -18,7 +17,7 @@ public class GeneratePDFInBackground implements Runnable {
         try {
             //Generating a PDF report
             Main.processData.createPDF();
-        } catch (IOException | DocumentException ignored) {}
+        } catch (IOException ignored) {}
 
         //If this thread is interrupted from the outside, we stop it
         if (Thread.currentThread().isInterrupted()) {
@@ -40,9 +39,10 @@ public class GeneratePDFInBackground implements Runnable {
         //Reloading the main menu screen so the wait screen is removed and the menu is usable again
         Platform.runLater(() -> {
             try {
-                Main.getCurrentStage().setScene(new Scene(new FXMLLoader(getClass().getResource("MainMenu-" + Main.language + ".fxml")).load()));
+                Scene mainScene = new Scene(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + Main.language + ".fxml")).load());
+                mainScene.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
+                Main.getCurrentStage().setScene(mainScene);
             } catch (IOException ignored) {}
-            Main.getCurrentStage().getScene().getStylesheets().add(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
         });
     }
 }

@@ -1,0 +1,6 @@
+DisplayMode=Dark
+Language=EN
+Currency=USD
+ExchangeRateLastUpdated=25.11.2023
+ExchangeRateToEUR=0.9152
+ExchangeRateToRON=4.5564
