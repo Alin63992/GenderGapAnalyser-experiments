@@ -1,0 +1,648 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import eu.iamgio.animated.transition.AnimatedSwitcher?>
+<?import javafx.geometry.Rectangle2D?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitMenuButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane id="main" prefHeight="790.0" prefWidth="1100.0" xmlns="http://javafx.com/javafx/20.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.gendergapanalyser.gendergapanalyser.Main">
+   <children>
+      <Hyperlink fx:id="voidLink" opacity="0.0" style="-fx-padding: 0;">
+         <font>
+            <Font size="1.0" />
+         </font>
+      </Hyperlink>
+      <AnchorPane id="menu-bar" fx:id="titleBar">
+         <children>
+            <Rectangle id="top-bar" arcHeight="5.0" arcWidth="5.0" fill="#0000001a" height="100.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" width="1100.0" />
+            <Text id="title" layoutX="14.0" layoutY="43.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Hello! Pick what you want to do. ">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+            </Text>
+            <Hyperlink fx:id="updateLink" layoutX="282.0" layoutY="25.0" onAction="#toggleUpdatePrompt" style="-fx-padding: 0;" text="Update available!" textFill="RED" visible="false">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+            </Hyperlink>
+            <Hyperlink fx:id="dataSourcesInfo" layoutX="14.0" layoutY="50.0" onAction="#toggleDataSources" style="-fx-padding: 0;" text="Information about data sources &amp; credits">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+               <graphic>
+                  <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Glyphs/Emojis/Information_Source.png" />
+                     </image>
+                  </ImageView>
+               </graphic>
+            </Hyperlink>
+            <ChoiceBox fx:id="languagePicker" layoutX="712.0" layoutY="25.0" prefHeight="25.0" prefWidth="150.0" styleClass="promptButtons" />
+            <Text layoutX="733.0" layoutY="65.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Currency: ">
+               <font>
+                  <Font name="Calibri" size="13.0" />
+               </font>
+            </Text>
+            <ChoiceBox fx:id="currencyPicker" layoutX="787.0" layoutY="50.0" prefHeight="25.0" prefWidth="75.0" styleClass="promptButtons" />
+         </children>
+      </AnchorPane>
+      <Text layoutX="265.0" layoutY="143.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="See the current statistics ">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+      </Text>
+      <Line endX="263.0" fill="BLACK" layoutX="572.0" layoutY="137.0" startX="-101.814453125" styleClass="separators" />
+      <Button fx:id="graphsButton" contentDisplay="TOP" layoutX="265.0" layoutY="167.0" mnemonicParsing="false" onAction="#goToGraphPage" prefHeight="250.0" prefWidth="250.0" styleClass="main-buttons" text="See the evolution graphs" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <graphic>
+            <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/Chart_with_Upwards_Trend.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Button fx:id="analysisButton" contentDisplay="TOP" layoutX="585.0" layoutY="167.0" mnemonicParsing="false" onAction="#goToAnalysisPage" prefHeight="250.0" prefWidth="250.0" styleClass="main-buttons" text="See the automatic interpretations of data" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <graphic>
+            <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/Memo.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Text layoutX="265.0" layoutY="466.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Do more with the current statistics ">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+      </Text>
+      <Line endX="181.0" fill="BLACK" layoutX="653.0" layoutY="461.0" startX="-100.470703125" styleClass="separators" />
+      <Button fx:id="predictButton" contentDisplay="TOP" layoutX="105.0" layoutY="484.0" mnemonicParsing="false" onAction="#togglePredictionPrompt" prefHeight="250.0" prefWidth="250.0" styleClass="main-buttons" text="Generate wage evolution predictions" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <graphic>
+            <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/Crystal_Ball.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Button fx:id="discardPredictionsButton" contentDisplay="CENTER" layoutX="120.0" layoutY="484.0" mnemonicParsing="false" onAction="#discardPredictions" styleClass="redButtons" text="🚮 Discard generated predictions" textFill="WHITE" visible="false">
+         <font>
+            <Font name="Calibri Light" size="15.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+      </Button>
+      <Button fx:id="PDFButton" contentDisplay="TOP" layoutX="425.0" layoutY="484.0" mnemonicParsing="false" onAction="#generatePDF" prefHeight="250.0" prefWidth="250.0" styleClass="main-buttons" text="Generate a PDF report" textAlignment="CENTER" wrapText="true">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+         <cursor>
+            <Cursor fx:constant="HAND" />
+         </cursor>
+         <graphic>
+            <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/Page_Facing_Up.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Button fx:id="mailButton" contentDisplay="TOP" layoutX="745.0" layoutY="484.0" mnemonicParsing="false" onAction="#toggleEmailPrompt" prefHeight="250.0" prefWidth="250.0" styleClass="main-buttons" text="Email the PDF report">
+         <font>
+            <Font name="Calibri" size="20.0" />
+         </font>
+         <graphic>
+            <ImageView fitHeight="70.0" fitWidth="70.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/E-Mail_Symbol.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Rectangle fx:id="darkOverlay" arcHeight="5.0" arcWidth="5.0" fill="#0000006d" height="790.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" visible="false" width="1100.0" />
+      <AnchorPane fx:id="predictionPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="300.0" layoutX="325.0" layoutY="245.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <Text layoutX="336.0" layoutY="274.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="For the next how many years do you want to generate predictions (1-100)?" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="predictionField" layoutX="507.0" layoutY="370.0" prefHeight="50.0" prefWidth="60.0" styleClass="inputs" text="1">
+               <font>
+                  <Font size="20.0" />
+               </font>
+            </TextField>
+            <Button layoutX="567.0" layoutY="370.0" mnemonicParsing="false" onAction="#increaseValue" prefHeight="25.0" prefWidth="25.0" style="-fx-padding: 0;" styleClass="promptButtons" text="+">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <Button layoutX="567.0" layoutY="395.0" mnemonicParsing="false" onAction="#decreaseValue" prefHeight="25.0" prefWidth="25.0" style="-fx-padding: 0;" styleClass="promptButtons" text="-">
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+               <font>
+                  <Font size="16.0" />
+               </font>
+            </Button>
+            <Text fx:id="invalidNumberWarning" fill="RED" layoutX="414.0" layoutY="457.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Please specify a number between 1 and 100!" visible="false">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <HBox alignment="CENTER" layoutX="370.0" layoutY="486.0" prefWidth="360.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#togglePredictionPrompt" prefHeight="37.0" prefWidth="180.0" styleClass="promptButtons" text="❌ Cancel">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#attemptPrediction" prefWidth="180.0" styleClass="promptButtons" text="✅ Predict">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="discardConfirmation" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="168.0" layoutX="325.0" layoutY="311.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <Text layoutX="336.0" layoutY="369.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Predictions discarded!" textAlignment="CENTER" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <Button layoutX="513.0" layoutY="399.0" mnemonicParsing="false" onAction="#closeDiscardConfirmation" styleClass="promptButtons" text="✅ OK">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="backgroundOperations" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="168.0" layoutX="325.0" layoutY="311.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <ImageView fx:id="loadingCircleImageView" fitHeight="75.0" fitWidth="75.0" layoutX="513.0" layoutY="334.0" pickOnBounds="true" preserveRatio="true" />
+            <Text layoutX="336.0" layoutY="452.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Please wait..." textAlignment="CENTER" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="emailPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="195.0" layoutX="326.0" layoutY="298.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="450.0" />
+            <Text layoutX="336.0" layoutY="327.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Please specify where the report should be sent" textAlignment="CENTER" wrappingWidth="429.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="emailField" layoutX="425.0" layoutY="357.0" prefHeight="25.0" prefWidth="237.0" styleClass="inputs" />
+            <Text fx:id="invalidEmailWarning" fill="RED" layoutX="343.0" layoutY="401.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Incorrect mail format! Please check if you typed it in correctly, then try again!" visible="false" wrappingWidth="415.03125">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <HBox alignment="CENTER" layoutX="370.0" layoutY="431.0" prefWidth="360.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#toggleEmailPrompt" prefWidth="180.0" styleClass="promptButtons" text="❌ Cancel">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#attemptSendMail" prefWidth="180.0" styleClass="promptButtons" text="✅ Send">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="missingOutgoingCredentialsPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="313.0" layoutX="207.0" layoutY="239.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="686.0" />
+            <Text layoutX="216.0" layoutY="265.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="A Microsoft Outlook account is needed to send the PDF report through e-mail. Please enter your Outlook credentials to send the report to your own e-mail address. It will show up in your inbox as &quot;Note to self&quot;, and the credentials will be forgotten after attempting to send the e-mail." textAlignment="CENTER" wrappingWidth="668.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <TextField fx:id="outgoingEmailField" layoutX="432.0" layoutY="393.0" prefHeight="25.0" prefWidth="237.0" promptText="E-mail address" styleClass="inputs" />
+            <PasswordField fx:id="outgoingPasswordField" layoutX="432.0" layoutY="423.0" prefHeight="25.0" prefWidth="237.0" promptText="Password" styleClass="inputs" />
+            <Text fx:id="invalidOutgoingEmailWarning" fill="RED" layoutX="311.0" layoutY="468.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Incorrect mail format! Please check if you typed it in correctly, then try again!" visible="false" wrappingWidth="478.03125">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <HBox alignment="CENTER" layoutX="371.0" layoutY="495.0" prefWidth="360.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#toggleEmailPrompt" prefWidth="180.0" styleClass="promptButtons" text="❌ Cancel">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#attemptSendMail" prefWidth="180.0" styleClass="promptButtons" text="✅ Send">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="dataSources" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="570.0" layoutX="301.0" layoutY="105.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="500.0" />
+            <HBox alignment="CENTER" layoutX="320.0" layoutY="119.0" prefHeight="37.0" prefWidth="460.0">
+               <children>
+                  <ToggleButton fx:id="sourcesToggle" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" selected="true" styleClass="informationToggles" text="Data Sources">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                     <toggleGroup>
+                        <ToggleGroup fx:id="informationButtons" />
+                     </toggleGroup>
+                  </ToggleButton>
+                  <ToggleButton fx:id="creditsToggle" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" styleClass="informationToggles" text="Credits" toggleGroup="$informationButtons">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </ToggleButton>
+               </children>
+            </HBox>
+            <AnchorPane fx:id="contentSources" layoutX="320.0" layoutY="165.0" prefHeight="460.0" prefWidth="460.0">
+               <children>
+                  <ImageView fitHeight="126.0" fitWidth="138.0" layoutX="9.0" layoutY="66.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="46.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Glyphs/Emojis/Information_Source.png" />
+                     </image>
+                  </ImageView>
+                  <Text layoutX="205.0" layoutY="57.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="The information regarding the salaries evolution in the United States is provided by the United States Department of Labor." textAlignment="JUSTIFY" wrappingWidth="250.0">
+                     <font>
+                        <Font name="Calibri" size="15.0" />
+                     </font>
+                  </Text>
+                  <Hyperlink fx:id="USDeptOfLaborHyperlink" graphicTextGap="15.0" layoutX="150.0" layoutY="117.0" style="-fx-padding: 0;" text="Source website">
+                     <font>
+                        <Font name="Calibri" size="15.0" />
+                     </font>
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../Glyphs/Emojis/Globe_with_Meridians.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Hyperlink>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="172.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Glyphs/Emojis/Calendar.png" />
+                     </image>
+                  </ImageView>
+                  <ImageView fx:id="ERALogoImageView" fitHeight="19.0" fitWidth="133.0" layoutX="6.0" layoutY="312.0" pickOnBounds="true" preserveRatio="true" />
+                  <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="249.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Glyphs/Emojis/Information_Source.png" />
+                     </image>
+                  </ImageView>
+                  <Text layoutX="205.0" layoutY="260.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="The exchange rates for converting United States Dollars (USD) to Euros (EUR) and Romanian New Leu (RON) are provided by the ExchangeRate-API." textAlignment="JUSTIFY" wrappingWidth="250.0">
+                     <font>
+                        <Font name="Calibri" size="15.0" />
+                     </font>
+                  </Text>
+                  <Hyperlink fx:id="ERAHyperlink" graphicTextGap="15.0" layoutX="150.0" layoutY="321.0" style="-fx-padding: 0;" text="Source website">
+                     <font>
+                        <Font name="Calibri" size="15.0" />
+                     </font>
+                     <graphic>
+                        <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                           <image>
+                              <Image url="@../Glyphs/Emojis/Globe_with_Meridians.png" />
+                           </image>
+                        </ImageView>
+                     </graphic>
+                  </Hyperlink>
+                  <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="375.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Glyphs/Emojis/Calendar.png" />
+                     </image>
+                  </ImageView>
+                  <Label fx:id="usDeptOfLaborYearRangeLabel" layoutX="205.0" layoutY="172.0" prefHeight="40.0" prefWidth="250.0" styleClass="labels" text="Range of years with statistics: " wrapText="true">
+                     <font>
+                        <Font name="Calibri" size="15.0" />
+                     </font>
+                  </Label>
+                  <Label fx:id="ERALastUpdatedLabel" layoutX="205.0" layoutY="375.0" prefHeight="40.0" prefWidth="250.0" styleClass="labels" text="Exchange rates last updated on " wrapText="true">
+                     <font>
+                        <Font name="Calibri" size="15.0" />
+                     </font>
+                  </Label>
+               </children>
+            </AnchorPane>
+            <AnchorPane fx:id="contentCredits" layoutX="320.0" layoutY="165.0" prefHeight="450.0" prefWidth="460.0" visible="false">
+               <children>
+                  <ScrollPane prefHeight="450.0" prefWidth="460.0" styleClass="mainMenuPromptsScrollPanes">
+                    <content>
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="750.0" prefWidth="425.0">
+                           <children>
+                              <ImageView fx:id="appIconCreditsImageView" fitHeight="150.0" fitWidth="200.0" layoutX="145.0" pickOnBounds="true" preserveRatio="true">
+                                 <image>
+                                    <Image url="@../Glyphs/Miscellaneous/AppIcon.png" />
+                                 </image>
+                              </ImageView>
+                              <Text layoutY="170.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="The &quot;Gender Fluid&quot; free icon, which is used as this application's icon and that's displayed on the taskbar and its splash screen, was created by Vitaly Gorbachev and was obtained from flaticon.com. It was also edited using flaticon's icon editing tool to have a white outline so it is visible on the splash screen when this application is in dark mode." textAlignment="JUSTIFY" wrappingWidth="425.0">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Text>
+                              <Text layoutY="265.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Hint: switch between the light and the dark theme using the toggles at the top of the screen to see both variations of this icon." textAlignment="JUSTIFY" wrappingWidth="425.0">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Text>
+                              <Hyperlink layoutY="287.0" onAction="#openAppIconPage" style="-fx-padding: 0;" text="Icon page on flaticon.com">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Hyperlink>
+                              <Text layoutY="333.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="The spinning rainbow circle animation, shown on the splash screen and the &quot;Please wait...&quot; prompts was downloaded from Icon8's Preloaders website." textAlignment="JUSTIFY" wrappingWidth="425.0">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Text>
+                              <Hyperlink layoutY="373.0" onAction="#openPreloadersWebsite" style="-fx-padding: 0;" text="The Preloaders website">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Hyperlink>
+                              <GridPane layoutX="-1.0" layoutY="408.0">
+                                 <columnConstraints>
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                 </columnConstraints>
+                                 <rowConstraints>
+                                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                                 </rowConstraints>
+                                 <children>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Female_Sign.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Male_Sign.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Leftwards_Black_Arrow.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Black_Rightwards_Arrow.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Information_Source.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="5">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Calendar.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="6">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Chart_with_Upwards_Trend.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Page_Facing_Up.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Memo.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/E-Mail_Symbol.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Globe_with_Meridians.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Crystal_Ball.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="5" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Black_Sun_with_Rays.png" />
+                                       </image>
+                                    </ImageView>
+                                    <ImageView fitHeight="61.0" fitWidth="61.0" pickOnBounds="true" preserveRatio="true" GridPane.columnIndex="6" GridPane.rowIndex="1">
+                                       <image>
+                                          <Image url="@../Glyphs/Emojis/Crescent_Moon.png" />
+                                       </image>
+                                    </ImageView>
+                                 </children>
+                              </GridPane>
+                              <Text layoutY="550.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="The icons above, displayed all throughout this application, were designed by Microsoft Corporation and obtained from Emojipedia.org." textAlignment="JUSTIFY" wrappingWidth="425.0">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Text>
+                              <Hyperlink layoutY="590.0" onAction="#openMSEmojipediaPage" style="-fx-padding: 0;" text="The Microsoft® page on Emojipedia®">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Hyperlink>
+                              <Text layoutY="640.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="This application was developed by Alin-Lucian Stănescu for the bachelor's degree final exam, based on the idea of the coordinating professor Iuliana Marin." textAlignment="JUSTIFY" wrappingWidth="425.0">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Text>
+                              <Hyperlink layoutY="680.0" onAction="#openProjectGitHubPage" style="-fx-padding: 0;" text="Open this project's GitHub page">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Hyperlink>
+                              <Text fx:id="versionText" layoutY="730.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="App version: ">
+                                 <font>
+                                    <Font name="Calibri" size="15.0" />
+                                 </font>
+                              </Text>
+                           </children>
+                        </AnchorPane>
+                    </content>
+                  </ScrollPane>
+               </children></AnchorPane>
+            <Button layoutX="503.0" layoutY="625.0" mnemonicParsing="false" onAction="#toggleDataSources" styleClass="promptButtons" text="❌ Close">
+               <font>
+                  <Font name="Calibri" size="20.0" />
+               </font>
+               <cursor>
+                  <Cursor fx:constant="HAND" />
+               </cursor>
+            </Button>
+         </children>
+      </AnchorPane>
+      <AnchorPane fx:id="updatePrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
+         <children>
+            <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="428.0" layoutX="343.0" layoutY="181.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="415.0" />
+            <Text layoutX="355.0" layoutY="211.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="A new update is available!" textAlignment="CENTER" wrappingWidth="390.0">
+               <font>
+                  <Font name="Calibri Light" size="20.0" />
+               </font>
+            </Text>
+            <Text fx:id="updateReleasedOn" layoutX="356.0" layoutY="240.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Update was released on: ">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <Text layoutX="356.0" layoutY="262.0" strokeType="OUTSIDE" strokeWidth="0.0" styleClass="texts" text="Changelog:">
+               <font>
+                  <Font name="Calibri" size="15.0" />
+               </font>
+            </Text>
+            <ScrollPane fx:id="changelogPane" layoutX="355.0" layoutY="272.0" prefHeight="273.0" prefWidth="390.0" style="-fx-padding: 10;" styleClass="mainMenuPromptsScrollPanes">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="200.0" prefWidth="200.0" />
+              </content>
+            </ScrollPane>
+            <HBox alignment="CENTER" layoutX="355.0" layoutY="558.0" prefHeight="37.0" prefWidth="390.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#toggleUpdatePrompt" prefHeight="37.0" prefWidth="195.0" styleClass="promptButtons" text="❌ Cancel">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+                  <SplitMenuButton fx:id="performUpdateButton" alignment="CENTER" mnemonicParsing="false" prefHeight="37.0" prefWidth="195.0" text="⬆ Update">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#openProjectGitHubPage" text="Open the project's GitHub page and download manually" />
+                    </items>
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </SplitMenuButton>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+      <AnimatedSwitcher fx:id="darkOverlayAnimator" />
+      <AnimatedSwitcher fx:id="promptAnimator" />
+      <Button id="lightModeButton" fx:id="lightModeButton" layoutX="874.0" layoutY="25.0" mnemonicParsing="false" onAction="#toggleDisplayMode" prefHeight="50.0" prefWidth="50.0" style="-fx-padding: 0;" textFill="WHITE">
+         <font>
+            <Font size="30.0" />
+         </font>
+         <graphic>
+            <ImageView fx:id="lightModeButtonGlyph" fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/Black_Sun_with_Rays.png" />
+               </image>
+               <viewport>
+                  <Rectangle2D />
+               </viewport>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Button id="darkModeButton" fx:id="darkModeButton" layoutX="924.0" layoutY="25.0" mnemonicParsing="false" onAction="#toggleDisplayMode" prefHeight="50.0" prefWidth="50.0" style="-fx-padding: 0;">
+         <font>
+            <Font size="30.0" />
+         </font>
+         <graphic>
+            <ImageView fx:id="darkModeButtonGlyph" fitHeight="45.0" fitWidth="45.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Glyphs/Emojis/Crescent_Moon.png" />
+               </image>
+            </ImageView>
+         </graphic>
+      </Button>
+      <Button id="minimizeButton" layoutX="986.0" layoutY="25.0" mnemonicParsing="false" onAction="#minimizeWindow" prefHeight="50.0" prefWidth="50.0" text="—">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+      </Button>
+      <Button layoutX="1036.0" layoutY="25.0" mnemonicParsing="false" onAction="#exitApp" prefHeight="50.0" prefWidth="50.0" styleClass="redButtons" text="❌" textFill="RED">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Button>
+   </children>
+</AnchorPane>
