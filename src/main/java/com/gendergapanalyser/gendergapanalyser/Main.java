@@ -13,6 +13,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -29,8 +30,11 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
+import one.jpro.platform.mdfx.MarkdownView;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.validator.routines.EmailValidator;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.awt.*;
 import java.io.*;
@@ -133,6 +137,27 @@ public class Main extends Application implements Initializable {
     private Button mailButton;
     @FXML
     private ImageView loadingCircleImageView;
+    MarkdownView mdview = new MarkdownView(){
+        @Override
+        public void setLink(Node node, String link, String description) {
+            node.setOnMouseClicked(e -> {
+                try {
+                    Desktop.getDesktop().browse(new URI(link));
+                } catch (IOException | URISyntaxException ignored) {
+
+                }
+            });
+        }
+
+        @Override
+        public Node generateImage(String url) {
+            if(url.equals("node://colorpicker")) {
+                return new ColorPicker();
+            } else {
+                return super.generateImage(url);
+            }
+        }
+    };
     protected static DataProcessing processData;
     protected static String displayMode = "Dark";
     protected static String language = "EN";
@@ -158,13 +183,14 @@ public class Main extends Application implements Initializable {
     @FXML
     private Text recoveryText;
     private boolean updateRouteSelectedOrRecoveryAborted = false;
-    private boolean allStartFilesExist = true;
+    private boolean allStartFilesExist = false;
 
     //String variable where the root of the GitHub link is stored for easier download
     String githubRoot = "https://raw.githubusercontent.com/Alin63992/GenderGapAnalyser/master/src/main/resources/com/gendergapanalyser/gendergapanalyser/";
     private final String appScreensFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/AppScreens";
     private final String emojisFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis";
     private final String miscellaneousFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous";
+    private final String stylesheetsFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Stylesheets";
     private static final File recoveryInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.recoveryinprogress");
     protected static final File updateInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.updateinprogress");
     protected static final File cleanupInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.cleanupinprogress");
@@ -247,6 +273,7 @@ public class Main extends Application implements Initializable {
         if (processData.predictionsGenerated) processData.createSalaryGraphWithPredictionsForEverybody();
         processData.createSalaryGraphForEverybody();
         getCurrentStage().getScene().getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
+        mdview.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/MarkdownFX-" + displayMode + ".css")).toExternalForm());
         ERALogoImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-" + displayMode + ".png")));
         if (displayMode.equals("Dark")) {
             appIconCreditsImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png")));
@@ -695,36 +722,41 @@ public class Main extends Application implements Initializable {
     private boolean performRecoveryByUpdating() {
         if (!updateRouteSelectedOrRecoveryAborted && !updateDetails[0].isEmpty()) {
             Alert updateFound = new Alert(Alert.AlertType.CONFIRMATION);
-            ButtonType update = new ButtonType(language.equals("EN") ? "Update" : "Actuali" + (language.equals("FR") ? "ser" : "zare"), ButtonBar.ButtonData.RIGHT);
+            ButtonType update = new ButtonType(language.equals("EN") ? "Update" : "Actuali" + (language.equals("FR") ? "ser" : "zare"), ButtonBar.ButtonData.OK_DONE);
             ButtonType goToGitHub = new ButtonType((language.equals("EN") ? "Open" : language.equals("FR") ? "Ouvrir" : "Deschidere") + " GitHub", ButtonBar.ButtonData.LEFT);
-            ButtonType quit = new ButtonType(language.equals("EN") ? "Cancel & Quit" : language.equals("FR") ? "Annuler & Quitter" : "Anulare & Închidere", ButtonBar.ButtonData.OK_DONE);
+            ButtonType quit = new ButtonType(language.equals("EN") ? "Cancel & Quit" : language.equals("FR") ? "Annuler & Quitter" : "Anulare & Închidere", ButtonBar.ButtonData.CANCEL_CLOSE);
             if (language.equals("EN")) {
                 updateFound.setTitle("Update required to recover");
-                updateFound.setContentText("The app is missing essential files and needs to recover them.\nRecovering downloads the missing required files from the project's GitHub repository, but the app now has an update waiting with files that contain new features, fixes and improvements which, when combined with the files the version of the app currently installed has, can cause conflicts and errors.\nTo avoid this situation, you can either update right now, open this project's GitHub page to download the source code yourself, or abort the recovery and quit the app.");
+                updateFound.setContentText("The app is missing essential files and needs to recover them.\nRecovering downloads the missing required files from the project's GitHub repository, but the app now has an update waiting with files that contain new features, fixes and improvements which, when combined with the files the version of the app currently installed has, can cause conflicts and errors." + /*" Unfortunately, the currently installed version of the app is no longer available to download, so the new version needs to be downloaded for recovery." + */"\nTo avoid conflicts, you can either update right now to the newest version, open this project's GitHub page to download the source code yourself, or abort the recovery and quit the app.\nTip: click the \"Show Details\" button below to read the changelog of this update!");
             } else if (language.equals("FR")) {
                 updateFound.setTitle("Actualisation nécessaire pour récupérer");
-                updateFound.setContentText("L'application manque des fichiers essentiels et necesite les récupérer.\nLa récuperation télécharge les fichiers essentiels manquants depuis le dépot GitHub de ce projet, mais l'application a maintenant une actualisation disponible contenant des fichiers avec nouveaux fonctions et améliorations qui, combinées avec les fichiers contenus dans la version d'application actuellement installée, peuvent causer des conflits et erreurs.\nPour éviter cette situation, vous pouvez actualiser maintenant, ouvrir la page GitHub de cet projet pour télécharger le code source vous-même, ou annuler la récuperation et quitter l'application.");
+                updateFound.setContentText("L'application manque des fichiers essentiels et necesite les récupérer.\nLa récuperation télécharge les fichiers essentiels manquants depuis le dépot GitHub de ce projet, mais l'application a maintenant une actualisation disponible contenant des fichiers avec nouveaux fonctions et améliorations qui, combinées avec les fichiers contenus dans la version d'application actuellement installée, peuvent causer des conflits et erreurs." + /*" Malheureusement, la version actuellement installée n'est plus disponible à télécharger, donc la nouvelle version doit être téléchargée pour la récuperation." + */"\nPour éviter des conflits, vous pouvez actualiser maintenant a la plus nouvelle version, ouvrir la page GitHub de cet projet pour télécharger le code source vous-même, ou annuler la récuperation et quitter l'application.\nConseil: Cliquez sur le bouton \"Show Details\" en dessous pour afficher les nouveautés de cette actualisation !");
             } else {
                 updateFound.setTitle("Actualizare necesară pentru recuperare");
-                updateFound.setContentText("Aplicației îi lipsesc fișiere esențiale și recuperarea lor este necesară.\nRecuperarea descarcă fișierele esențiale care lipsesc de pe depozitul GitHub al acestui proiect, dar aplicația are acum o actualizare disponibilă ce conține fișiere cu noi funcții și îmbunătățiri care, combinate cu fișierele conținute în versiunea instalată acum a aplicației, pot cauza conflicte și erori.\nPentru a evita această situație, puteți actualiza aplicația acum, deschide pagina GitHub a proiectului pentru a descărca codul sursă, sau anula recuperarea și închide aplicația.");
+                updateFound.setContentText("Aplicației îi lipsesc fișiere esențiale și recuperarea lor este necesară.\nRecuperarea descarcă fișierele esențiale care lipsesc de pe depozitul GitHub al acestui proiect, dar aplicația are acum o actualizare disponibilă ce conține fișiere cu noi funcții și îmbunătățiri care, combinate cu fișierele conținute în versiunea instalată acum a aplicației, pot cauza conflicte și erori." + /*" Din păcate, versiunea instalată acum nu mai este disponibilă pentru descărcare, deci va trebui descărcată noua versiune pentru recuperare." + */"\nPentru a evita conflictele, puteți actualiza aplicația acum la cea mai nouă versiune, deschide pagina GitHub a proiectului pentru a descărca codul sursă, sau anula recuperarea și închide aplicația.\nSfat: faceți click pe butonul \"Show Details\" de dedesubt pentru a citi ce este nou în această actualizare!");
             }
             updateFound.setHeaderText(updateFound.getTitle());
-            Label changelog = new Label(updateDetails[1]);
-            changelog.setPrefWidth(750);
-            changelog.setWrapText(true);
-            ScrollPane changelogArea = new ScrollPane(changelog);
-            changelogArea.setPrefWidth(750);
-            changelogArea.setPrefHeight(250);
-            /*changelogArea.setEditable(false);
-            changelogArea.setWrapText(true);*/
-            /*HBox expandableContent = new HBox();
-            expandableContent.getChildren().setAll(changelogArea);*/
-            updateFound.getDialogPane().setExpandableContent(changelogArea);
             updateFound.getButtonTypes().clear();
             updateFound.getButtonTypes().add(goToGitHub);
-            updateFound.getButtonTypes().add(update);
             updateFound.getButtonTypes().add(quit);
-            updateFound.getDialogPane().setMaxWidth(750);
+            updateFound.getButtonTypes().add(update);
+            updateFound.getDialogPane().setPrefWidth(750);
+            ScrollPane changelogArea = new ScrollPane();
+            changelogArea.setPrefWidth(updateFound.getDialogPane().getPrefWidth() - 50);
+            changelogArea.setPrefHeight(250);
+            String changelog = updateDetails[1];
+            changelog = changelog.replaceAll("~", "");
+            changelog = changelog.replaceAll("\\*", "");
+            changelog = changelog.replaceAll("_", "");
+            changelog = changelog.replaceAll("\\[", "");
+            changelog = changelog.replaceAll("]\\(", " (");
+            Label changelogLabel = new Label(changelog);
+            changelogLabel.setWrapText(true);
+            changelogLabel.setPrefWidth(changelogArea.getPrefWidth() - 35);
+            changelogLabel.setStyle("-fx-font-family: Calibri");
+            changelogLabel.setStyle("-fx-font-size: 15");
+            changelogArea.setContent(changelogLabel);
+            updateFound.getDialogPane().setExpandableContent(changelogArea);
             Optional<ButtonType> choice = updateFound.showAndWait();
             if (choice.isPresent() && choice.get() == goToGitHub) {
                 try {
@@ -763,9 +795,6 @@ public class Main extends Application implements Initializable {
     @FXML
     private boolean checkAndRecover() {
         System.out.println("Beginning application integrity check...");
-        //TODO download the current app's version's archive using tags (throws FileNotFoundException upon download attempt if the tag or archive no longer exists
-        //TODO modify performUpdatingByRecovery to inform the user that the current version is no longer available to download
-        //TODO modify this function to not require downloading the whole version's archive or updating if a certain file was found in the resources folder and not in the target folder
 
         //Continuing to check and recover the AppScreens folder
         if (!new File(appScreensFolder + "/MainMenu-EN.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-EN.fxml").exists()) {
@@ -1204,11 +1233,42 @@ public class Main extends Application implements Initializable {
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png").toURL(), new File(miscellaneousFolder + "/US-Dept-of-Labor-Logo.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/US-Dept-of-Labor-Logo.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png"));
-                    } catch (IOException e) {
-                        if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
-                        return false;
-                    }
+            } catch (IOException e) {
+                if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
+                return false;
+            }
+        }
+
+        //Checking if the MarkdownFX stylesheets exist, and if not, trying to download it
+        if (!new File(stylesheetsFolder + "/MarkdownFX-Dark.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css").exists()) {
+            if (!performRecoveryByUpdating()) {
+                try {
+                    if (!recoveryInProgress.exists())
+                        recoveryInProgress.createNewFile();
+                    FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/MarkdownFX-Dark.css").toURL(), new File(stylesheetsFolder + "/MarkdownFX-Dark.css"), 500, 2000);
+                    if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css").exists())
+                        Files.copy(Path.of(stylesheetsFolder + "/MarkdownFX-Dark.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css"));
+                } catch (IOException e) {
+                    if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
+                    allStartFilesExist = false;
                 }
+            }
+        }
+        if (!new File(stylesheetsFolder + "/MarkdownFX-Light.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css").exists()) {
+            if (!performRecoveryByUpdating()) {
+                try {
+                    if (!recoveryInProgress.exists())
+                        recoveryInProgress.createNewFile();
+                    FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/MarkdownFX-Light.css").toURL(), new File(stylesheetsFolder + "/MarkdownFX-Light.css"), 500, 2000);
+                    if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css").exists())
+                        Files.copy(Path.of(stylesheetsFolder + "/MarkdownFX-Light.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css"));
+                } catch (IOException e) {
+                    if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
+                    allStartFilesExist = false;
+                }
+            }
+        }
+
 
         //Checking if the fallback dataset CSV file exists, and if not, trying to download it
         if (!new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/FallbackDataset.csv").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/FallbackDataset.csv").exists()) {
@@ -1239,7 +1299,6 @@ public class Main extends Application implements Initializable {
 
     @Override
     public void start(Stage primaryStage) {
-        String stylesheetsFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Stylesheets";
         Runnable appLoad = () -> {
             try {
                 //Checking the app integrity
@@ -1263,19 +1322,17 @@ public class Main extends Application implements Initializable {
                             if (connection.getResponseCode() == 200) {
                                 //Saving the JSON response
                                 BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) connection.getContent()));
-                                ArrayList<String> json = new ArrayList<>();
+                                StringBuilder json = new StringBuilder();
                                 String output;
                                 while ((output = br.readLine()) != null)
-                                    json.add(output);
-                                if (json.size() > 1 && json.get(1).contains("\"result\":\"success\"")) {
-                                    for (String jsonPart : json) {
-                                        if (jsonPart.contains("\"EUR\""))
-                                            exchangeRateEUR = Double.parseDouble(jsonPart.split(":")[1].substring(0, jsonPart.split(":")[1].length() - 1));
-                                        else if (jsonPart.contains("\"RON\"")) {
-                                            exchangeRateRON = Double.parseDouble(jsonPart.split(":")[1].substring(0, jsonPart.split(":")[1].length() - 1));
-                                            break;
-                                        }
-                                    }
+                                    json.append(output);
+                                //Parsing the JSON response
+                                JSONObject obj = (JSONObject) JSONValue.parse(json.toString());
+                                if (obj.get("result").equals("success")) {
+                                    Map<String, Double> currencies = (Map<String, Double>) obj.get("conversion_rates");
+                                    exchangeRateEUR = currencies.get("EUR");
+                                    exchangeRateRON = currencies.get("RON");
+
                                     //Setting the current date as the date of last update
                                     exchangeRateLastUpdated.set(GregorianCalendar.DAY_OF_MONTH, LocalDate.now().getDayOfMonth());
                                     exchangeRateLastUpdated.set(GregorianCalendar.MONTH, LocalDate.now().getMonthValue());
@@ -1312,6 +1369,7 @@ public class Main extends Application implements Initializable {
                                 });
                             }
                         } catch (IOException e) {
+                            e.printStackTrace();
                             exchangeRateLastUpdated.add(GregorianCalendar.DAY_OF_MONTH, -1);
                             currency = "USD";
                             BufferedWriter buildUserSettings = new BufferedWriter(new FileWriter("src/main/resources/com/gendergapanalyser/gendergapanalyser/Properties.txt"));
@@ -1456,7 +1514,7 @@ public class Main extends Application implements Initializable {
             }
 
             //First, the app checks if the dark + light mode app icons and loading wheels exist in the Miscellaneous folder.
-            //Next, the app checks if the dark + light mode CSS files exist in the Stylesheets folder.
+            //Next, the app checks if the dark + light mode app CSS files exist in the Stylesheets folder.
             //Then, the app checks if the English, French and Romanian splash screens exist in the AppScreens folder.
             //If any or all of these files are missing, they are downloaded and saved in their own respective folders.
             //This is done to make sure that every resource needed by the splash screen exists so it can be displayed to
@@ -1479,7 +1537,7 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            if (!new File(miscellaneousFolder + "/AppIcon-Dark.png").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png").exists()) {
+            else if (!new File(miscellaneousFolder + "/AppIcon-Dark.png").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1493,7 +1551,7 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            if (!new File(miscellaneousFolder + "/loading-Dark.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Dark.gif").exists()) {
+            else if (!new File(miscellaneousFolder + "/loading-Dark.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Dark.gif").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1507,7 +1565,7 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            if (!new File(miscellaneousFolder + "/loading-Light.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Light.gif").exists()) {
+            else if (!new File(miscellaneousFolder + "/loading-Light.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Light.gif").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1523,7 +1581,7 @@ public class Main extends Application implements Initializable {
             }
 
             //Checking and recovering the Stylesheets folder
-            if (!new File(stylesheetsFolder + "/DarkMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/DarkMode.css").exists()) {
+            else if (!new File(stylesheetsFolder + "/DarkMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/DarkMode.css").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1537,7 +1595,7 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            if (!new File(stylesheetsFolder + "/LightMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/LightMode.css").exists()) {
+            else if (!new File(stylesheetsFolder + "/LightMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/LightMode.css").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1553,7 +1611,7 @@ public class Main extends Application implements Initializable {
             }
 
             //Checking and recovering the splash screen FXML files
-            if (!new File(appScreensFolder + "/SplashScreen-EN.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-EN.fxml").exists()) {
+            else if (!new File(appScreensFolder + "/SplashScreen-EN.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-EN.fxml").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1567,7 +1625,7 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            if (!new File(appScreensFolder + "/SplashScreen-FR.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-FR.fxml").exists()) {
+            else if (!new File(appScreensFolder + "/SplashScreen-FR.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-FR.fxml").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1581,7 +1639,7 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            if (!new File(appScreensFolder + "/SplashScreen-RO.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-RO.fxml").exists()) {
+            else if (!new File(appScreensFolder + "/SplashScreen-RO.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-RO.fxml").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
                         if (!recoveryInProgress.exists())
@@ -1595,6 +1653,8 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
+            else
+                allStartFilesExist = true;
 
             //The app now has the AppScreens, Glyphs/Emojis, Glyphs/Miscellaneous, and the Stylesheets folders in the
             // resources and target folders. The app also has the app icons and loading wheels, the dark and light mode
@@ -1687,17 +1747,12 @@ public class Main extends Application implements Initializable {
                 updateReleasedOn.setText(updateReleasedOn.getText() + updateReleaseDate[0] + "." + updateReleaseDate[1] + "." + updateReleaseDate[2]);
                 if (Integer.parseInt(updateReleaseDate[3]) > 1)
                     updateReleasedOn.setText(updateReleasedOn.getText() + ", Revision " + updateReleaseDate[3]);
-                //Creating a label with the changelog
-                Label changelog = new Label(updateDetails[1]);
-                //Making it big enough to be comfortable to read
-                changelog.setStyle("-fx-font-family: Calibri");
-                changelog.setStyle("-fx-font-size: 15");
-                //Making it span across the entire width of the update changelog scroll pane,
-                // not including the vertical scroll bar
-                changelog.setPrefWidth(changelogPane.getPrefWidth() - 35);
-                //Making it wrap so that the changelog doesn't get truncated and shown on a single line
-                changelog.setWrapText(true);
-                changelogPane.setContent(changelog);
+                mdview.setMdString(updateDetails[1]);
+                //TODO check if the MarkdownFX stylesheets exist and download them too, if they don't
+                //TODO show the recovery by update alert only if the zip of the current version tag can't be downloaded (check checkAndRecovery())
+                mdview.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/MarkdownFX-" + displayMode + ".css")).toExternalForm());
+                mdview.setPrefWidth(changelogPane.getPrefWidth() - 35);
+                changelogPane.setContent(mdview);
             }
 
             //Setting up the language picker
@@ -1900,8 +1955,6 @@ public class Main extends Application implements Initializable {
         //System.out.println("GenderGapAnalyser-experiments-main".length());
         String destinationFolder = new File(".").getCanonicalPath();
         String s = "C:\\Users\\alin1\\OneDrive\\Desktop\\Uni stuff\\Licenta\\GenderGapAnalyser\\UpdateInfo.txt";
-        System.out.println(s.replace(destinationFolder, destinationFolder + File.separator + "GenderGapAnalyser-Backup"));
-        System.out.println(new File(s).isDirectory());
         launch();
     }
 }

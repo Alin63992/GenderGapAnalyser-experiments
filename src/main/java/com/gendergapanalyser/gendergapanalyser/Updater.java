@@ -1,6 +1,5 @@
 package com.gendergapanalyser.gendergapanalyser;
 
-
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -8,6 +7,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -22,7 +23,7 @@ import java.util.zip.ZipFile;
 
 public class Updater {
     //Variable that holds the date this update will have been published
-    protected static final GregorianCalendar appCurrentUpdateDate = new GregorianCalendar(2023, Calendar.SEPTEMBER, 1);
+    protected static final GregorianCalendar appCurrentUpdateDate = new GregorianCalendar(2023, Calendar.NOVEMBER, 28);
     //Variable that holds the number of revisions that this update will have been published
     private static final int dailyRevision = 1;
     //Array that holds the update details
@@ -42,23 +43,21 @@ public class Updater {
             connection.connect();
             //Saving the JSON response
             BufferedReader br = new BufferedReader(new InputStreamReader((InputStream) (connection.getResponseCode() == 200 ? connection.getContent() : connection.getErrorStream())));
-            String[] responseArray = br.readLine().split(",");
+            String output;
+            StringBuilder json = new StringBuilder();
+            while ((output = br.readLine()) != null)
+                json.append(output);
+            JSONObject obj = (JSONObject) JSONValue.parse(json.toString());
             boolean gitVersionHigherThanLocalVersion = false;
-            for (String s : responseArray) {
-                if (s.contains("\"tag_name\"")) {
-                    String versionNumberString = s.split(":")[1];
-                    String formattedVersionNumber = versionNumberString.substring(1, versionNumberString.length() - 1);
-                    if (!formattedVersionNumber.equals(getCurrentAppVersion())) {
-                        if (Integer.parseInt(formattedVersionNumber.split("\\.")[0]) > appCurrentUpdateDate.get(GregorianCalendar.DAY_OF_MONTH) || Integer.parseInt(formattedVersionNumber.split("\\.")[1]) - 1 > appCurrentUpdateDate.get(GregorianCalendar.MONTH) || Integer.parseInt(formattedVersionNumber.split("\\.")[2]) > appCurrentUpdateDate.get(GregorianCalendar.YEAR) || Integer.parseInt(formattedVersionNumber.split("\\.")[3]) > dailyRevision) {
-                            updateDetails[0] = versionNumberString.substring(1, versionNumberString.length() - 1);
-                            gitVersionHigherThanLocalVersion = true;
-                        }
-                    }
+            String formattedVersionNumber = obj.get("tag_name").toString();
+            if (!formattedVersionNumber.equals(getCurrentAppVersion())) {
+                if (Integer.parseInt(formattedVersionNumber.split("\\.")[0]) > appCurrentUpdateDate.get(GregorianCalendar.DAY_OF_MONTH) || Integer.parseInt(formattedVersionNumber.split("\\.")[1]) - 1 > appCurrentUpdateDate.get(GregorianCalendar.MONTH) || Integer.parseInt(formattedVersionNumber.split("\\.")[2]) > appCurrentUpdateDate.get(GregorianCalendar.YEAR) || Integer.parseInt(formattedVersionNumber.split("\\.")[3]) > dailyRevision) {
+                    updateDetails[0] = formattedVersionNumber;
+                    gitVersionHigherThanLocalVersion = true;
                 }
-                if (s.contains("\"body\"") && gitVersionHigherThanLocalVersion) {
-                    String updateChangelog = s.split(":")[1];
-                    updateDetails[1] = updateChangelog.substring(1, updateChangelog.length() - 2);
-                }
+            }
+            if (gitVersionHigherThanLocalVersion) {
+                updateDetails[1] = obj.get("body").toString();
             }
         }
         catch (IOException ignored) {}

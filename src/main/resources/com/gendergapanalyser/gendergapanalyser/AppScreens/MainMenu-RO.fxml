@@ -18,6 +18,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.shape.Rectangle?>
@@ -192,22 +193,26 @@
                   <Font name="Calibri" size="15.0" />
                </font>
             </Text>
-            <Button layoutX="401.0" layoutY="484.0" mnemonicParsing="false" onAction="#togglePredictionPrompt" styleClass="promptButtons" text="❌ Anulează">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-            </Button>
-            <Button layoutX="575.0" layoutY="484.0" mnemonicParsing="false" onAction="#attemptPrediction" prefHeight="37.0" prefWidth="125.0" styleClass="promptButtons" text="✅ Prezice">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-               <cursor>
-                  <Cursor fx:constant="HAND" />
-               </cursor>
-            </Button>
+            <HBox layoutX="371.0" layoutY="484.0" prefWidth="360.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#togglePredictionPrompt" prefWidth="180.0" styleClass="promptButtons" text="❌ Anulează">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#attemptPrediction" prefHeight="37.0" prefWidth="180.0" styleClass="promptButtons" text="✅ Prezice">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                     <cursor>
+                        <Cursor fx:constant="HAND" />
+                     </cursor>
+                  </Button>
+               </children>
+            </HBox>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="discardConfirmation" prefHeight="790.0" prefWidth="1100.0" visible="false">
@@ -253,16 +258,20 @@
                   <Font name="Calibri" size="15.0" />
                </font>
             </Text>
-            <Button layoutX="409.0" layoutY="432.0" mnemonicParsing="false" onAction="#toggleEmailPrompt" styleClass="promptButtons" text="❌ Anulare">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-            </Button>
-            <Button layoutX="553.0" layoutY="432.0" mnemonicParsing="false" onAction="#attemptSendMail" styleClass="promptButtons" text="✅ Trimitere">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-            </Button>
+            <HBox layoutX="371.0" layoutY="432.0" prefWidth="360.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#toggleEmailPrompt" prefWidth="180.0" styleClass="promptButtons" text="❌ Anulare">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#attemptSendMail" prefWidth="180.0" styleClass="promptButtons" text="✅ Trimitere">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="missingOutgoingCredentialsPrompt" prefHeight="790.0" prefWidth="1100.0" visible="false">
@@ -280,16 +289,20 @@
                   <Font name="Calibri" size="15.0" />
                </font>
             </Text>
-            <Button layoutX="416.0" layoutY="494.0" mnemonicParsing="false" onAction="#toggleEmailPrompt" styleClass="promptButtons" text="❌ Anulare">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-            </Button>
-            <Button layoutX="560.0" layoutY="494.0" mnemonicParsing="false" onAction="#attemptSendMail" styleClass="promptButtons" text="✅ Trimitere">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-            </Button>
+            <HBox layoutX="370.0" layoutY="494.0" prefWidth="360.0">
+               <children>
+                  <Button mnemonicParsing="false" onAction="#toggleEmailPrompt" prefWidth="180.0" styleClass="promptButtons" text="❌ Anulare">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+                  <Button mnemonicParsing="false" onAction="#attemptSendMail" prefWidth="180.0" styleClass="promptButtons" text="✅ Trimitere">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </Button>
+               </children>
+            </HBox>
          </children>
       </AnchorPane>
       <AnchorPane fx:id="dataSources" prefHeight="790.0" prefWidth="1100.0" visible="false">

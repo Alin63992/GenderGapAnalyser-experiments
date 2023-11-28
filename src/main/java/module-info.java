@@ -14,6 +14,8 @@ module com.gendergapanalyser.gendergapanalyser {
     requires kernel;
     requires layout;
     requires io;
+    requires json.simple;
+    requires one.jpro.platform.mdfx;
 
 
     opens com.gendergapanalyser.gendergapanalyser to javafx.fxml;
