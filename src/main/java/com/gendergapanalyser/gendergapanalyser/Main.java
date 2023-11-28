@@ -1369,7 +1369,6 @@ public class Main extends Application implements Initializable {
                                 });
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
                             exchangeRateLastUpdated.add(GregorianCalendar.DAY_OF_MONTH, -1);
                             currency = "USD";
                             BufferedWriter buildUserSettings = new BufferedWriter(new FileWriter("src/main/resources/com/gendergapanalyser/gendergapanalyser/Properties.txt"));
@@ -1415,7 +1414,8 @@ public class Main extends Application implements Initializable {
                         as.of(getCurrentStage().getScene().getRoot());
                         try {
                             as.setChild(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + language + ".fxml")).load());
-                        } catch (IOException ignored) {
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
                         getCurrentStage().setScene(scene);
                         switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
@@ -1509,9 +1509,7 @@ public class Main extends Application implements Initializable {
                     Files.createDirectories(Path.of(stylesheetsFolder));
                     Files.createDirectories(Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets"));
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException ignored) {}
 
             //First, the app checks if the dark + light mode app icons and loading wheels exist in the Miscellaneous folder.
             //Next, the app checks if the dark + light mode app CSS files exist in the Stylesheets folder.
@@ -1682,8 +1680,7 @@ public class Main extends Application implements Initializable {
                     splash.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
                     getCurrentStage().setScene(splash);
                     getCurrentStage().show();
-                } catch (IOException ignored) {
-                }
+                } catch (IOException ignored) {}
 
                 //Checking if the app crashed during an update (the .updateinprogress file exists),
                 // to resume updating if it did
@@ -1741,7 +1738,7 @@ public class Main extends Application implements Initializable {
             promptAnimator.setOut(new Animation(new ZoomOut()).setSpeed(3));
             darkOverlayAnimator.setOut(new Animation(new FadeOut()).setSpeed(3));
 
-            if (!updateDetails[0].isEmpty()) {
+            if (updateDetails[0] != null && !updateDetails[0].isEmpty()) {
                 updateLink.setVisible(true);
                 String[] updateReleaseDate = updateDetails[0].split("\\.");
                 updateReleasedOn.setText(updateReleasedOn.getText() + updateReleaseDate[0] + "." + updateReleaseDate[1] + "." + updateReleaseDate[2]);
