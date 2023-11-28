@@ -145,12 +145,12 @@ public class Updater {
                 while (enu.hasMoreElements()) {
                     boolean fileIsNew = false;
                     ZipEntry entry = enu.nextElement();
-                    File zipEntryToBeExtracted = new File(destinationFolder, entry.getName()/*.substring(("GenderGapAnalyser-" + updateDetails[0]).length() + 1)*/); //the substring excludes "GenderGapAnalyser-<new version number>/" from the path so that everything copies to the main app folders and not to the subfolder of the zip archive created by GitHub which contains all the new app files
+                    File zipEntryToBeExtracted = new File(destinationFolder, entry.getName().substring(("GenderGapAnalyser-experiments-" + updateDetails[0]).length() + 1)); //the substring excludes "GenderGapAnalyser-<new version number>/" from the path so that everything copies to the main app folders and not to the subfolder of the zip archive created by GitHub which contains all the new app files
                     //Checking if the zip entry isn't empty
                     // (so that the entry's path isn't the root folder of the app itself), or if the entry's path
                     // starts with the root folder of the app (to not be vulnerable to zip-slipping - learn more at
                     // https://snyk.io/research/zip-slip-vulnerability)
-                    if (!zipEntryToBeExtracted.getCanonicalPath().equals(destinationFolder) && zipEntryToBeExtracted.getCanonicalPath().startsWith(destinationFolder)) {
+                    if (!entry.getName().startsWith(".idea") && !entry.getName().startsWith(".git") && !zipEntryToBeExtracted.getCanonicalPath().equals(destinationFolder) && zipEntryToBeExtracted.getCanonicalPath().startsWith(destinationFolder)) {
                         //Checking if the file wasn't already copied or the folder already created
                         if (!copiedFiles.contains(zipEntryToBeExtracted.getCanonicalPath())) {
                             //Checking if the zip entry is a folder or a file
