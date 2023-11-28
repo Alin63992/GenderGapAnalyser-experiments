@@ -1415,8 +1415,7 @@ public class Main extends Application implements Initializable {
                         as.of(getCurrentStage().getScene().getRoot());
                         try {
                             as.setChild(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + language + ".fxml")).load());
-                        } catch (IOException ignored) {
-                        }
+                        } catch (IOException ignored) {}
                         getCurrentStage().setScene(scene);
                         switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
                         switchTheme.init();

@@ -27,7 +27,7 @@ public class Updater {
     //Variable that holds the number of revisions that this update will have been published
     private static final int dailyRevision = 1;
     //Array that holds the update details
-    private static String[] updateDetails = new String[2];
+    private static final String[] updateDetails = {"", ""};
 
     public static String getCurrentAppVersion() {
         return appCurrentUpdateDate.get(GregorianCalendar.DAY_OF_MONTH) + "." + (appCurrentUpdateDate.get(GregorianCalendar.MONTH) + 1) + "." + appCurrentUpdateDate.get(GregorianCalendar.YEAR) + "." + dailyRevision;
