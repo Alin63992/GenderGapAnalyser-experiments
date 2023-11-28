@@ -1,6 +1,0 @@
-DisplayMode=Light
-Language=RO
-Currency=RON
-ExchangeRateLastUpdated=26.11.2023
-ExchangeRateToEUR=0.9153
-ExchangeRateToRON=4.5558

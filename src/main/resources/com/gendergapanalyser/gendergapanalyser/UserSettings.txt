@@ -1,2 +1,0 @@
-DisplayMode=Light
-Language=FR
