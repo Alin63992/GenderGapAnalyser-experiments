@@ -233,6 +233,7 @@ public class Updater {
             }
 
             //Cleaning up
+            
             try {
                 Main.cleanupInProgress.createNewFile();
                 /*Platform.runLater(() -> {
