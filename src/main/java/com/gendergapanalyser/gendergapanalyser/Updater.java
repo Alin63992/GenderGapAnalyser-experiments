@@ -14,6 +14,7 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -23,7 +24,7 @@ import java.util.zip.ZipFile;
 
 public class Updater {
     //Variable that holds the date this update will have been published
-    protected static final GregorianCalendar appCurrentUpdateDate = new GregorianCalendar(2023, Calendar.NOVEMBER, 28);
+    protected static final GregorianCalendar appCurrentUpdateDate = new GregorianCalendar(2023, Calendar.NOVEMBER, 27);
     //Variable that holds the number of revisions that this update will have been published
     private static final int dailyRevision = 1;
     //Array that holds the update details
@@ -74,7 +75,7 @@ public class Updater {
                 //Traversing all the app files in the app directory
                 Files.walk(Path.of("")).forEach(path -> {
                     //Ignoring the .git, GenderGapAnalyser-Backup and target folders since they don't get modified during the update
-                    if (!path.startsWith(".git") && !path.startsWith(backupFolder) && !path.startsWith("target")) {
+                    if (!path.startsWith(".git") && !path.startsWith(backupFolder) && !path.startsWith("target") && !path.endsWith(".updateinprogress") && !path.endsWith(".rollbackinprogress") && !path.endsWith(".cleanupinprogress")) {
                         try {
                             //If the item we're on is a folder, we create it within the backup folder (ignoring the blank entry that's found first)
                             if (path.toFile().isDirectory()) {
@@ -160,10 +161,17 @@ public class Updater {
                             } else {
                                 //Checking if a file with the same name exists already in the app file
                                 if (!new File(zipEntryToBeExtracted.getCanonicalPath()).exists())
-                                    //Categorizing the app as new, if not
+                                    //Categorizing the file as new, if not
                                     fileIsNew = true;
                                 //Copying the file to the app files
-                                Files.copy(archivedUpdate.getInputStream(entry), Path.of(zipEntryToBeExtracted.getCanonicalPath()), StandardCopyOption.REPLACE_EXISTING);
+                                //TODO doesn't work for app icons, ERA logos and the loading gifs (FileSystemException: file in use). Maybe schedule them to be replaced before the update done alert is shown?
+                                try {
+                                    Files.copy(archivedUpdate.getInputStream(entry), Path.of(zipEntryToBeExtracted.getCanonicalPath()), StandardCopyOption.REPLACE_EXISTING);
+                                }
+                                catch (FileSystemException e) {
+                                    e.printStackTrace();
+
+                                }
                             }
                             //Adding the new folder or the newly copied file to the copiedFiles array and the update log
                             copiedFiles.add(fileIsNew ? "New:" + zipEntryToBeExtracted.getName() : zipEntryToBeExtracted.getCanonicalPath());
@@ -187,14 +195,15 @@ public class Updater {
                     //Setting the screen to inform the user that an error occurred and a rollback is in progress
                     Main.updateInProgress.delete();
                     Main.rollbackInProgress.createNewFile();
-                    Platform.runLater(() -> {
+                    /*Platform.runLater(() -> {
                         try {
                             Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
                             splash.getStylesheets().setAll(Objects.requireNonNull(Updater.class.getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                             Main.getCurrentStage().setScene(splash);
                         }
                         catch (IOException ignored) {}
-                    });
+                    });*/
+                    Main.splashScreenController.toggleRollbackText(true);
 
                     //Closing the stream that writes to the update info log file, in case an error occurs
                     // before the file is closed for writing
@@ -226,14 +235,15 @@ public class Updater {
             //Cleaning up
             try {
                 Main.cleanupInProgress.createNewFile();
-                Platform.runLater(() -> {
+                /*Platform.runLater(() -> {
                     try {
                         Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
                         splash.getStylesheets().setAll(Objects.requireNonNull(Updater.class.getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
                         Main.getCurrentStage().setScene(splash);
                     }
                     catch (IOException ignored) {}
-                });
+                });*/
+                Main.splashScreenController.toggleCleanupText(true);
                 downloadedUpdateArchive.delete();
                 FileUtils.deleteDirectory(new File(backupFolder));
                 new File("UpdateInfo.txt").delete();
@@ -290,6 +300,7 @@ public class Updater {
         Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
         splash.getStylesheets().setAll(Objects.requireNonNull(Updater.class.getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
         Main.getCurrentStage().setScene(splash);
+        //Main.splashScreenController.toggleUpdateText(true);
         new Thread(applyUpdate).start();
     }
 }

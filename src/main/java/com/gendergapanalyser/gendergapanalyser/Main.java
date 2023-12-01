@@ -137,6 +137,8 @@ public class Main extends Application implements Initializable {
     private Button mailButton;
     @FXML
     private ImageView loadingCircleImageView;
+    protected FXMLLoader splashScreen;
+    protected static ManageSplashScreen splashScreenController;
     MarkdownView mdview = new MarkdownView(){
         @Override
         public void setLink(Node node, String link, String description) {
@@ -191,7 +193,7 @@ public class Main extends Application implements Initializable {
     private final String emojisFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis";
     private final String miscellaneousFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous";
     private final String stylesheetsFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Stylesheets";
-    private static final File recoveryInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.recoveryinprogress");
+    public static final File recoveryInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.recoveryinprogress");
     protected static final File updateInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.updateinprogress");
     protected static final File cleanupInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.cleanupinprogress");
     protected static final File rollbackInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.rollbackinprogress");
@@ -1677,7 +1679,9 @@ public class Main extends Application implements Initializable {
 
                 //Opening the app window containing the splash screen
                 try {
-                    Scene splash = new Scene(new FXMLLoader(getClass().getResource("AppScreens/SplashScreen-" + language + ".fxml")).load());
+                    splashScreen = new FXMLLoader(getClass().getResource("AppScreens/SplashScreen-" + language + ".fxml")).load();
+                    Scene splash = new Scene(splashScreen.load());
+                    splashScreenController = splashScreen.getController();
                     splash.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
                     getCurrentStage().setScene(splash);
                     getCurrentStage().show();
