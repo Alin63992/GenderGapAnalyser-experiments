@@ -1642,7 +1642,7 @@ public class Main extends Application implements Initializable {
         if (!updateDetails[0].isEmpty()) {
             updateLink.setVisible(true);
             String[] updateReleaseDate = updateDetails[0].split("\\.");
-            updateReleasedOn.setText(updateReleasedOn.getText() + updateReleaseDate[0] + "." + updateReleaseDate[1] + "." + updateReleaseDate[2]);
+            updateReleasedOn.setText(updateReleasedOn.getText() + (updateReleaseDate[0].length() == 1 ? "0" + updateReleaseDate[0] : updateReleaseDate[0]) + "." + (updateReleaseDate[1].length() == 1 ? "0" + updateReleaseDate[1] : updateReleaseDate[1]) + "." + updateReleaseDate[2]);
             if (Integer.parseInt(updateReleaseDate[3]) > 1)
                 updateReleasedOn.setText(updateReleasedOn.getText() + ", Revision " + updateReleaseDate[3]);
             mdview.setMdString(updateDetails[1]);
