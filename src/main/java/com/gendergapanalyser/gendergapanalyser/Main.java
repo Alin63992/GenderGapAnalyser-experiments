@@ -25,11 +25,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import one.jpro.platform.mdfx.MarkdownView;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -44,6 +42,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -137,8 +136,6 @@ public class Main extends Application implements Initializable {
     private Button mailButton;
     @FXML
     private ImageView loadingCircleImageView;
-    protected FXMLLoader splashScreen;
-    protected static ManageSplashScreen splashScreenController;
     MarkdownView mdview = new MarkdownView(){
         @Override
         public void setLink(Node node, String link, String description) {
@@ -185,7 +182,7 @@ public class Main extends Application implements Initializable {
     @FXML
     private Text recoveryText;
     private boolean updateRouteSelectedOrRecoveryAborted = false;
-    private boolean allStartFilesExist = false;
+    private boolean allStartFilesExist = true;
 
     //String variable where the root of the GitHub link is stored for easier download
     String githubRoot = "https://raw.githubusercontent.com/Alin63992/GenderGapAnalyser/master/src/main/resources/com/gendergapanalyser/gendergapanalyser/";
@@ -193,11 +190,11 @@ public class Main extends Application implements Initializable {
     private final String emojisFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis";
     private final String miscellaneousFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous";
     private final String stylesheetsFolder = "src/main/resources/com/gendergapanalyser/gendergapanalyser/Stylesheets";
-    public static final File recoveryInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.recoveryinprogress");
-    protected static final File updateInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.updateinprogress");
-    protected static final File cleanupInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.cleanupinprogress");
-    protected static final File rollbackInProgress = new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/.rollbackinprogress");
+    protected static final File updateInProgress = new File(".updateInProgress");
+    protected static final File filesInUseToBeReplacedAtNextStart = new File("FilesInUseToBeReplacedAtNextStart.txt");
+    public static String appState = "Normal";
     private AnimatedThemeSwitcher switchTheme;
+    protected static boolean interruptThreads = false;
 
 
     //Function used to set the currently open window to be used in the future
@@ -234,10 +231,9 @@ public class Main extends Application implements Initializable {
 
     //Function used to delete the generated graphs and quit the app
     public static void exitAppMain() {
-        //Killing the thread that downloads the updated dataset if it's still running
-        if (downloadDataset.isAlive()) {
-            downloadDataset.interrupt();
-        }
+        //Killing all the running secondary threads
+        // (dataset update, prediction, PDF report generation, email send, splash screen management)
+        interruptThreads = true;
 
         if (!updateInProgress.exists()) {
             //Cleaning up the files created during app run
@@ -776,7 +772,7 @@ public class Main extends Application implements Initializable {
         return updateRouteSelectedOrRecoveryAborted;
     }
 
-    private void reloadSplashScreen(boolean createRecoveryInProgressFile) throws IOException {
+    /*private void reloadSplashScreen(boolean createRecoveryInProgressFile) throws IOException {
         if (createRecoveryInProgressFile)
             recoveryInProgress.createNewFile();
         else
@@ -792,7 +788,7 @@ public class Main extends Application implements Initializable {
                 }
             });
         }
-    }
+    }*/
 
     @FXML
     private boolean checkAndRecover() {
@@ -803,9 +799,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/MainMenu-EN.fxml").toURL(), new File(appScreensFolder + "/MainMenu-EN.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-EN.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/MainMenu-EN.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-EN.fxml"));
@@ -818,9 +812,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/MainMenu-FR.fxml").toURL(), new File(appScreensFolder + "/MainMenu-FR.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-FR.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/MainMenu-FR.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-FR.fxml"));
@@ -833,9 +825,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/MainMenu-RO.fxml").toURL(), new File(appScreensFolder + "/MainMenu-RO.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-RO.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/MainMenu-RO.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/MainMenu-RO.fxml"));
@@ -848,9 +838,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/DisplayEvolutionGraph-EN.fxml").toURL(), new File(appScreensFolder + "/DisplayEvolutionGraph-EN.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/DisplayEvolutionGraph-EN.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/DisplayEvolutionGraph-EN.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/DisplayEvolutionGraph-EN.fxml"));
@@ -863,9 +851,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/DisplayEvolutionGraph-FR.fxml").toURL(), new File(appScreensFolder + "/DisplayEvolutionGraph-FR.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/DisplayEvolutionGraph-FR.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/DisplayEvolutionGraph-FR.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/DisplayEvolutionGraph-FR.fxml"));
@@ -878,9 +864,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/DisplayEvolutionGraph-RO.fxml").toURL(), new File(appScreensFolder + "/DisplayEvolutionGraph-RO.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/DisplayEvolutionGraph-RO.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/DisplayEvolutionGraph-RO.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/DisplayEvolutionGraph-RO.fxml"));
@@ -893,9 +877,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/Analysis-EN.fxml").toURL(), new File(appScreensFolder + "/Analysis-EN.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/Analysis-EN.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/Analysis-EN.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/Analysis-EN.fxml"));
@@ -908,9 +890,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/Analysis-FR.fxml").toURL(), new File(appScreensFolder + "/Analysis-FR.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/Analysis-FR.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/Analysis-FR.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/Analysis-FR.fxml"));
@@ -923,9 +903,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/Analysis-RO.fxml").toURL(), new File(appScreensFolder + "/Analysis-RO.fxml"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/Analysis-RO.fxml").exists())
                     Files.copy(Path.of(appScreensFolder + "/Analysis-RO.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/Analysis-RO.fxml"));
@@ -940,9 +918,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Black_Rightwards_Arrow.png").toURL(), new File(emojisFolder + "/Black_Rightwards_Arrow.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Black_Rightwards_Arrow.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Black_Rightwards_Arrow.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Black_Rightwards_Arrow.png"));
@@ -955,9 +931,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Black_Sun_with_Rays.png").toURL(), new File(emojisFolder + "/Black_Sun_with_Rays.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Black_Sun_with_Rays.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Black_Sun_with_Rays.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Black_Sun_with_Rays.png"));
@@ -971,9 +945,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Calendar.png").toURL(), new File(emojisFolder + "/Calendar.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Calendar.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Calendar.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Calendar.png"));
@@ -987,9 +959,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Chart_with_Upwards_Trend.png").toURL(), new File(emojisFolder + "/Chart_with_Upwards_Trend.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Chart_with_Upwards_Trend.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Chart_with_Upwards_Trend.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Chart_with_Upwards_Trend.png"));
@@ -1002,9 +972,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Crescent_Moon.png").toURL(), new File(emojisFolder + "/Crescent_Moon.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Crescent_Moon.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Crescent_Moon.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Crescent_Moon.png"));
@@ -1017,9 +985,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Crystal_Ball.png").toURL(), new File(emojisFolder + "/Crystal_Ball.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Crystal_Ball.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Crystal_Ball.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Crystal_Ball.png"));
@@ -1032,9 +998,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/E-Mail_Symbol.png").toURL(), new File(emojisFolder + "/E-Mail_Symbol.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/E-Mail_Symbol.png").exists())
                     Files.copy(Path.of(emojisFolder + "/E-Mail_Symbol.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/E-Mail_Symbol.png"));
@@ -1047,9 +1011,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Female_Sign.png").toURL(), new File(emojisFolder + "/Female_Sign.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Female_Sign.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Female_Sign.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Female_Sign.png"));
@@ -1062,9 +1024,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Globe_with_Meridians.png").toURL(), new File(emojisFolder + "/Globe_with_Meridians.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Globe_with_Meridians.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Globe_with_Meridians.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Globe_with_Meridians.png"));
@@ -1077,9 +1037,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Information_Source.png").toURL(), new File(emojisFolder + "/Information_Source.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Information_Source.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Information_Source.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Information_Source.png"));
@@ -1092,9 +1050,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Leftwards_Black_Arrow.png").toURL(), new File(emojisFolder + "/Leftwards_Black_Arrow.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Leftwards_Black_Arrow.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Leftwards_Black_Arrow.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Leftwards_Black_Arrow.png"));
@@ -1107,9 +1063,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Male_Sign.png").toURL(), new File(emojisFolder + "/Male_Sign.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Male_Sign.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Male_Sign.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Male_Sign.png"));
@@ -1122,9 +1076,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Memo.png").toURL(), new File(emojisFolder + "/Memo.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Memo.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Memo.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Memo.png"));
@@ -1137,9 +1089,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Emojis/Page_Facing_Up.png").toURL(), new File(emojisFolder + "/Page_Facing_Up.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Page_Facing_Up.png").exists())
                     Files.copy(Path.of(emojisFolder + "/Page_Facing_Up.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Emojis/Page_Facing_Up.png"));
@@ -1154,9 +1104,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/alert-confirmation.png").toURL(), new File(miscellaneousFolder + "/alert-confirmation.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-confirmation.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/alert-confirmation.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-confirmation.png"));
@@ -1169,9 +1117,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/alert-error.png").toURL(), new File(miscellaneousFolder + "/alert-error.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-error.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/alert-error.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-error.png"));
@@ -1184,9 +1130,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/alert-information.png").toURL(), new File(miscellaneousFolder + "/alert-information.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-information.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/alert-information.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-information.png"));
@@ -1199,9 +1143,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/ExchangeRate-API-Logo-Dark.png").toURL(), new File(miscellaneousFolder + "/ExchangeRate-API-Logo-Dark.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-Dark.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/ExchangeRate-API-Logo-Dark.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-Dark.png"));
@@ -1214,9 +1156,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/ExchangeRate-API-Logo-Light.png").toURL(), new File(miscellaneousFolder + "/ExchangeRate-API-Logo-Light.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-Light.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/ExchangeRate-API-Logo-Light.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-Light.png"));
@@ -1229,9 +1169,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png").toURL(), new File(miscellaneousFolder + "/US-Dept-of-Labor-Logo.png"), 500, 2000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png").exists())
                     Files.copy(Path.of(miscellaneousFolder + "/US-Dept-of-Labor-Logo.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/US-Dept-of-Labor-Logo.png"));
@@ -1243,31 +1181,29 @@ public class Main extends Application implements Initializable {
 
         //Checking if the MarkdownFX stylesheets exist, and if not, trying to download it
         if (!new File(stylesheetsFolder + "/MarkdownFX-Dark.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css").exists()) {
-            if (!performRecoveryByUpdating()) {
-                try {
-                    if (!recoveryInProgress.exists())
-                        recoveryInProgress.createNewFile();
-                    FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/MarkdownFX-Dark.css").toURL(), new File(stylesheetsFolder + "/MarkdownFX-Dark.css"), 500, 2000);
-                    if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css").exists())
-                        Files.copy(Path.of(stylesheetsFolder + "/MarkdownFX-Dark.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css"));
-                } catch (IOException e) {
-                    if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
-                    allStartFilesExist = false;
-                }
+            if (performRecoveryByUpdating())
+                return false;
+            try {
+                appState = "StartupStage-Recovery";
+                FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/MarkdownFX-Dark.css").toURL(), new File(stylesheetsFolder + "/MarkdownFX-Dark.css"), 500, 2000);
+                if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css").exists())
+                    Files.copy(Path.of(stylesheetsFolder + "/MarkdownFX-Dark.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Dark.css"));
+            } catch (IOException e) {
+                if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
+                allStartFilesExist = false;
             }
         }
         if (!new File(stylesheetsFolder + "/MarkdownFX-Light.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css").exists()) {
-            if (!performRecoveryByUpdating()) {
-                try {
-                    if (!recoveryInProgress.exists())
-                        recoveryInProgress.createNewFile();
-                    FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/MarkdownFX-Light.css").toURL(), new File(stylesheetsFolder + "/MarkdownFX-Light.css"), 500, 2000);
-                    if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css").exists())
-                        Files.copy(Path.of(stylesheetsFolder + "/MarkdownFX-Light.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css"));
-                } catch (IOException e) {
-                    if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
-                    allStartFilesExist = false;
-                }
+            if (performRecoveryByUpdating())
+                return false;
+            try {
+                appState = "StartupStage-Recovery";
+                FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/MarkdownFX-Light.css").toURL(), new File(stylesheetsFolder + "/MarkdownFX-Light.css"), 500, 2000);
+                if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css").exists())
+                    Files.copy(Path.of(stylesheetsFolder + "/MarkdownFX-Light.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/MarkdownFX-Light.css"));
+            } catch (IOException e) {
+                if (e instanceof FileNotFoundException) fileNotFoundOnGit = true;
+                allStartFilesExist = false;
             }
         }
 
@@ -1277,9 +1213,7 @@ public class Main extends Application implements Initializable {
             if (performRecoveryByUpdating())
                 return false;
             try {
-                if (!recoveryInProgress.exists()) {
-                    reloadSplashScreen(true);
-                }
+                appState = "StartupStage-Recovery";
                 FileUtils.copyURLToFile(URI.create(githubRoot + "FallbackDataset.csv").toURL(), new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/FallbackDataset.csv"), 500, 10000);
                 if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/FallbackDataset.csv").exists())
                     Files.copy(Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/FallbackDataset.csv"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/FallbackDataset.csv"));
@@ -1290,12 +1224,7 @@ public class Main extends Application implements Initializable {
         }
 
         //Finishing recovery
-        try {
-            if (recoveryInProgress.exists())
-                reloadSplashScreen(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        appState = "Normal";
         return true;
     }
 
@@ -1371,7 +1300,6 @@ public class Main extends Application implements Initializable {
                                 });
                             }
                         } catch (IOException e) {
-                            e.printStackTrace();
                             exchangeRateLastUpdated.add(GregorianCalendar.DAY_OF_MONTH, -1);
                             currency = "USD";
                             BufferedWriter buildUserSettings = new BufferedWriter(new FileWriter("src/main/resources/com/gendergapanalyser/gendergapanalyser/Properties.txt"));
@@ -1425,7 +1353,6 @@ public class Main extends Application implements Initializable {
                     });
                 } else {
                     if (!updateRouteSelectedOrRecoveryAborted) {
-                        recoveryInProgress.delete();
                         System.out.println("Application integrity check complete. Application is missing essential files! Startup aborted!");
                         Platform.runLater(() -> {
                             Alert applicationError = new Alert(Alert.AlertType.ERROR);
@@ -1527,8 +1454,7 @@ public class Main extends Application implements Initializable {
             if (!new File(miscellaneousFolder + "/AppIcon.png").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon.png").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/AppIcon.png").toURL(), new File(miscellaneousFolder + "/AppIcon.png"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon.png").exists())
                             Files.copy(Path.of(miscellaneousFolder + "/AppIcon.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon.png"));
@@ -1538,11 +1464,10 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else if (!new File(miscellaneousFolder + "/AppIcon-Dark.png").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png").exists()) {
+            if (!new File(miscellaneousFolder + "/AppIcon-Dark.png").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/AppIcon-Dark.png").toURL(), new File(miscellaneousFolder + "/AppIcon-Dark.png"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png").exists())
                             Files.copy(Path.of(miscellaneousFolder + "/AppIcon-Dark.png"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png"));
@@ -1552,11 +1477,10 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else if (!new File(miscellaneousFolder + "/loading-Dark.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Dark.gif").exists()) {
+            if (!new File(miscellaneousFolder + "/loading-Dark.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Dark.gif").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/loading-Dark.gif").toURL(), new File(miscellaneousFolder + "/loading-Dark.gif"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Dark.gif").exists())
                             Files.copy(Path.of(miscellaneousFolder + "/loading-Dark.gif"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Dark.gif"));
@@ -1566,11 +1490,10 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else if (!new File(miscellaneousFolder + "/loading-Light.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Light.gif").exists()) {
+            if (!new File(miscellaneousFolder + "/loading-Light.gif").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Light.gif").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "Glyphs/Miscellaneous/loading-Light.gif").toURL(), new File(miscellaneousFolder + "/loading-Light.gif"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Light.gif").exists())
                             Files.copy(Path.of(miscellaneousFolder + "/loading-Light.gif"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-Light.gif"));
@@ -1582,11 +1505,10 @@ public class Main extends Application implements Initializable {
             }
 
             //Checking and recovering the Stylesheets folder
-            else if (!new File(stylesheetsFolder + "/DarkMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/DarkMode.css").exists()) {
+            if (!new File(stylesheetsFolder + "/DarkMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/DarkMode.css").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/DarkMode.css").toURL(), new File(stylesheetsFolder + "/DarkMode.css"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/DarkMode.css").exists())
                             Files.copy(Path.of(stylesheetsFolder + "/DarkMode.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/DarkMode.css"));
@@ -1596,11 +1518,10 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else if (!new File(stylesheetsFolder + "/LightMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/LightMode.css").exists()) {
+            if (!new File(stylesheetsFolder + "/LightMode.css").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/LightMode.css").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "Stylesheets/LightMode.css").toURL(), new File(stylesheetsFolder + "/LightMode.css"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/LightMode.css").exists())
                             Files.copy(Path.of(stylesheetsFolder + "/LightMode.css"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/Stylesheets/LightMode.css"));
@@ -1612,11 +1533,10 @@ public class Main extends Application implements Initializable {
             }
 
             //Checking and recovering the splash screen FXML files
-            else if (!new File(appScreensFolder + "/SplashScreen-EN.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-EN.fxml").exists()) {
+            if (!new File(appScreensFolder + "/SplashScreen-EN.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-EN.fxml").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/SplashScreen-EN.fxml").toURL(), new File(appScreensFolder + "/SplashScreen-EN.fxml"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-EN.fxml").exists())
                             Files.copy(Path.of(appScreensFolder + "/SplashScreen-EN.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-EN.fxml"));
@@ -1626,11 +1546,10 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else if (!new File(appScreensFolder + "/SplashScreen-FR.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-FR.fxml").exists()) {
+            if (!new File(appScreensFolder + "/SplashScreen-FR.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-FR.fxml").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/SplashScreen-FR.fxml").toURL(), new File(appScreensFolder + "/SplashScreen-FR.fxml"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-FR.fxml").exists())
                             Files.copy(Path.of(appScreensFolder + "/SplashScreen-FR.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-FR.fxml"));
@@ -1640,11 +1559,10 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else if (!new File(appScreensFolder + "/SplashScreen-RO.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-RO.fxml").exists()) {
+            if (!new File(appScreensFolder + "/SplashScreen-RO.fxml").exists() || !new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-RO.fxml").exists()) {
                 if (!performRecoveryByUpdating()) {
                     try {
-                        if (!recoveryInProgress.exists())
-                            recoveryInProgress.createNewFile();
+                        appState = "StartupStage-Recovery";
                         FileUtils.copyURLToFile(URI.create(githubRoot + "AppScreens/SplashScreen-RO.fxml").toURL(), new File(appScreensFolder + "/SplashScreen-RO.fxml"), 500, 2000);
                         if (!new File("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-RO.fxml").exists())
                             Files.copy(Path.of(appScreensFolder + "/SplashScreen-RO.fxml"), Path.of("target/classes/com/gendergapanalyser/gendergapanalyser/AppScreens/SplashScreen-RO.fxml"));
@@ -1654,8 +1572,6 @@ public class Main extends Application implements Initializable {
                     }
                 }
             }
-            else
-                allStartFilesExist = true;
 
             //The app now has the AppScreens, Glyphs/Emojis, Glyphs/Miscellaneous, and the Stylesheets folders in the
             // resources and target folders. The app also has the app icons and loading wheels, the dark and light mode
@@ -1663,6 +1579,28 @@ public class Main extends Application implements Initializable {
             //The app window with the splash screen can now be opened.
 
             if (allStartFilesExist) {
+                //Setting the app state to be normal.
+                appState = "Normal";
+                //Checking if there are files left to be replaced
+                // that couldn't be replaced during the update because they were in use
+                if (filesInUseToBeReplacedAtNextStart.exists()) {
+                    try (BufferedReader readRemainingFiles = new BufferedReader(new FileReader(filesInUseToBeReplacedAtNextStart.getName()))) {
+                        String remainderPath;
+                        while ((remainderPath = readRemainingFiles.readLine()) != null) {
+                            if (new File(remainderPath + ".copy").exists()) {
+                                Files.copy(Path.of(remainderPath + ".copy"), Path.of(remainderPath), StandardCopyOption.REPLACE_EXISTING);
+                                String targetRemainderPath;
+                                if (remainderPath.contains("resources"))
+                                    targetRemainderPath = remainderPath.replace("src" + File.separator + "main" + File.separator + "resources", "target" + File.separator + "classes");
+                                else
+                                    targetRemainderPath = remainderPath.replace("src" + File.separator + "main" + File.separator + "java", "target" + File.separator + "classes");
+                                Files.copy(Path.of(remainderPath + ".copy"), Path.of(targetRemainderPath), StandardCopyOption.REPLACE_EXISTING);
+                                new File(remainderPath + ".copy").delete();
+                            }
+                        }
+                    }
+                    filesInUseToBeReplacedAtNextStart.delete();
+                }
                 //Setting the primary stage so that other controllers can use it to display what they need displayed
                 setCurrentStage(primaryStage);
                 getCurrentStage().initStyle(StageStyle.UNDECORATED);
@@ -1679,13 +1617,12 @@ public class Main extends Application implements Initializable {
 
                 //Opening the app window containing the splash screen
                 try {
-                    splashScreen = new FXMLLoader(getClass().getResource("AppScreens/SplashScreen-" + language + ".fxml")).load();
-                    Scene splash = new Scene(splashScreen.load());
-                    splashScreenController = splashScreen.getController();
+                    Scene splash = new Scene(new FXMLLoader(getClass().getResource("AppScreens/SplashScreen-" + language + ".fxml")).load());
                     splash.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
                     getCurrentStage().setScene(splash);
                     getCurrentStage().show();
-                } catch (IOException ignored) {
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
                 //Checking if the app crashed during an update (the .updateinprogress file exists),
@@ -1706,15 +1643,6 @@ public class Main extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //TODO: make GenderGapAnalyser-private public for testing
-        //TODO: try to translate the changelog too (maybe google translate/deepl has an api? file on git with translated changelogs for better control over them?)
-        //TODO: implement the updating mechanism: replacing classes and files? redirecting the user to github to download? downloading directly and asking the user for destination?
-        //TODO: fix focusing to the update split button elements
-        //TODO: group the variables better and change them to private
-        //TODO: test the update system once finished
-        //TODO: test recovery through updating once the update system is finished
-        //TODO: remember to save the working app with the file replace update mechanism before testing out the mechanism, to not end up with a broken app and lost work
-
         //Making the window movable when dragging the embedded title bar
         titleBar.setOnMousePressed(event -> {
             dragX = getCurrentStage().getX() - event.getScreenX();
@@ -1725,78 +1653,118 @@ public class Main extends Application implements Initializable {
             getCurrentStage().setY(event.getScreenY() + dragY);
         });
 
-        if (getCurrentStage().getTitle().equals("Gender Gap Analyser")) {
-            try {
-                if (displayMode.equals("Dark"))
-                    appIconImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png")));
-                loadingCircleImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-" + Main.displayMode + ".gif")));
-            } catch (FileNotFoundException ignored) {}
-            if (updateInProgress.exists()) {
-                updateText.setVisible(true);
-            }
-            recoveryText.setVisible(recoveryInProgress.exists());
-            rollbackText.setVisible(rollbackInProgress.exists());
-            noCloseWindowText.setVisible(updateInProgress.exists() || recoveryInProgress.exists() || rollbackInProgress.exists());
-            cleanupText.setVisible(cleanupInProgress.exists());
-        } else {
-            promptAnimator.setIn(new Animation(new ZoomIn()).setSpeed(3));
-            darkOverlayAnimator.setIn(new Animation(new FadeIn()).setSpeed(3));
-            promptAnimator.setOut(new Animation(new ZoomOut()).setSpeed(3));
-            darkOverlayAnimator.setOut(new Animation(new FadeOut()).setSpeed(3));
+        promptAnimator.setIn(new Animation(new ZoomIn()).setSpeed(3));
+        darkOverlayAnimator.setIn(new Animation(new FadeIn()).setSpeed(3));
+        promptAnimator.setOut(new Animation(new ZoomOut()).setSpeed(3));
+        darkOverlayAnimator.setOut(new Animation(new FadeOut()).setSpeed(3));
 
-            if (!updateDetails[0].isEmpty()) {
-                updateLink.setVisible(true);
-                String[] updateReleaseDate = updateDetails[0].split("\\.");
-                updateReleasedOn.setText(updateReleasedOn.getText() + updateReleaseDate[0] + "." + updateReleaseDate[1] + "." + updateReleaseDate[2]);
-                if (Integer.parseInt(updateReleaseDate[3]) > 1)
-                    updateReleasedOn.setText(updateReleasedOn.getText() + ", Revision " + updateReleaseDate[3]);
-                mdview.setMdString(updateDetails[1]);
-                //TODO check if the MarkdownFX stylesheets exist and download them too, if they don't
-                //TODO show the recovery by update alert only if the zip of the current version tag can't be downloaded (check checkAndRecovery())
-                mdview.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/MarkdownFX-" + displayMode + ".css")).toExternalForm());
-                mdview.setPrefWidth(changelogPane.getPrefWidth() - 35);
-                changelogPane.setContent(mdview);
-            }
+        if (!updateDetails[0].isEmpty()) {
+            updateLink.setVisible(true);
+            String[] updateReleaseDate = updateDetails[0].split("\\.");
+            updateReleasedOn.setText(updateReleasedOn.getText() + updateReleaseDate[0] + "." + updateReleaseDate[1] + "." + updateReleaseDate[2]);
+            if (Integer.parseInt(updateReleaseDate[3]) > 1)
+                updateReleasedOn.setText(updateReleasedOn.getText() + ", Revision " + updateReleaseDate[3]);
+            mdview.setMdString(updateDetails[1]);
+            mdview.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/MarkdownFX-" + displayMode + ".css")).toExternalForm());
+            mdview.setPrefWidth(changelogPane.getPrefWidth() - 35);
+            changelogPane.setContent(mdview);
+        }
 
-            //Setting up the language picker
-            languagePicker.setItems(FXCollections.observableArrayList(languages));
-            switch (language) {
-                case "EN" -> languagePicker.setValue(languages[0]);
-                case "FR" -> languagePicker.setValue(languages[1]);
-                case "RO" -> languagePicker.setValue(languages[2]);
-            }
-            //When selecting another language from the language picker...
-            languagePicker.getSelectionModel().selectedIndexProperty().addListener(((observable, oldValue, newValue) -> {
-                //Updating the language with the newly picked one
-                language = languagesShort[newValue.intValue()];
+        //Setting up the language picker
+        languagePicker.setItems(FXCollections.observableArrayList(languages));
+        switch (language) {
+            case "EN" -> languagePicker.setValue(languages[0]);
+            case "FR" -> languagePicker.setValue(languages[1]);
+            case "RO" -> languagePicker.setValue(languages[2]);
+        }
+        //When selecting another language from the language picker...
+        languagePicker.getSelectionModel().selectedIndexProperty().addListener(((observable, oldValue, newValue) -> {
+            //Updating the language with the newly picked one
+            language = languagesShort[newValue.intValue()];
+            //Setting the boolean variable used by DataProcessing.createPDF method to true
+            // so that the method generates a new PDF document in a new language
+            changedLanguage = true;
+            //Checking if the currency has been updated (default is -1.0)
+            if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0) {
+                //Updating the currency with the one associated with the language
+                currency = currencies[newValue.intValue()];
                 //Setting the boolean variable used by DataProcessing.createPDF method to true
-                // so that the method generates a new PDF document in a new language
-                changedLanguage = true;
-                //Checking if the currency has been updated (default is -1.0)
-                if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0) {
-                    //Updating the currency with the one associated with the language
-                    currency = currencies[newValue.intValue()];
-                    //Setting the boolean variable used by DataProcessing.createPDF method to true
-                    // so that the method generates a new PDF document with the new currency
-                    changedCurrency = true;
-                } else
-                    currencyPicker.setValue(currencies[0]);
+                // so that the method generates a new PDF document with the new currency
+                changedCurrency = true;
+            } else
+                currencyPicker.setValue(currencies[0]);
+            Runnable rebuildResources = () -> {
+                try {
+                    BufferedWriter buildUserSettings = new BufferedWriter(new FileWriter("src/main/resources/com/gendergapanalyser/gendergapanalyser/Properties.txt"));
+                    buildUserSettings.write("DisplayMode=" + displayMode + "\nLanguage=" + language + "\nCurrency=" + currency + "\nExchangeRateLastUpdated=" + exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.YEAR) + "\nExchangeRateToEUR=" + exchangeRateEUR + "\nExchangeRateToRON=" + exchangeRateRON);
+                    buildUserSettings.close();
+                    //Checking if the currencies have ever been updated
+                    if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0) {
+                        //Creating the usable dataset,
+                        // graphs and interpretations again so that it uses the new language and currency
+                        processData.prepareData();
+                    } else {
+                        //Just regenerating the graphs and interpretations to use the new language
+                        processData.createSalaryGraphForEverybody();
+                        processData.performAnalysis();
+                    }
+                    //Recreating predictions and prediction graphs so that they use the newly set language
+                    if (processData.predictionsGenerated) {
+                        processData.predictEvolutions(predictionValue);
+                        processData.createSalaryGraphWithPredictionsForEverybody();
+                    }
+                } catch (IOException ignored) {}
+
+                Platform.runLater(() -> {
+                    try {
+                        Scene mainScene = new Scene(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + language + ".fxml")).load());
+                        mainScene.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
+                        getCurrentStage().setScene(mainScene);
+                    } catch (IOException ignored) {
+                    }
+                    //Changing the title of the current stage
+                    getCurrentStage().setTitle(language.equals("EN") ? "Main Menu" : language.equals("FR") ? "Menu Principal" : "Meniu Principal");
+                    switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
+                    switchTheme.init();
+                });
+            };
+            promptAnimator.setChild(new Pane(backgroundOperations));
+            darkOverlayAnimator.setChild(new Pane(darkOverlay));
+            try {
+                loadingCircleImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-" + displayMode + ".gif")));
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+            backgroundOperations.setVisible(true);
+            darkOverlay.setVisible(true);
+            new Thread(rebuildResources).start();
+        }));
+
+        //Setting up the currency picker
+        currencyPicker.setItems(FXCollections.observableArrayList(currencies));
+        switch (currency) {
+            case "USD" -> currencyPicker.setValue(currencies[0]);
+            case "EUR" -> currencyPicker.setValue(currencies[1]);
+            case "RON" -> currencyPicker.setValue(currencies[2]);
+        }
+        //Checking if the currencies were ever updated or if they are set to their default -1.0 value
+        if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0) {
+            //When selecting another currency from the currency picker...
+            currencyPicker.getSelectionModel().selectedIndexProperty().addListener(((observable, oldValue, newValue) -> {
+                //Updating the currency with the newly picked one
+                currency = currencies[newValue.intValue()];
                 Runnable rebuildResources = () -> {
                     try {
+                        //Setting the boolean variable used by DataProcessing.createPDF method to true
+                        // so that the method generates a new PDF document with the new currency
+                        changedCurrency = true;
+                        //Rebuilding our resources
                         BufferedWriter buildUserSettings = new BufferedWriter(new FileWriter("src/main/resources/com/gendergapanalyser/gendergapanalyser/Properties.txt"));
                         buildUserSettings.write("DisplayMode=" + displayMode + "\nLanguage=" + language + "\nCurrency=" + currency + "\nExchangeRateLastUpdated=" + exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.YEAR) + "\nExchangeRateToEUR=" + exchangeRateEUR + "\nExchangeRateToRON=" + exchangeRateRON);
                         buildUserSettings.close();
-                        //Checking if the currencies have ever been updated
-                        if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0) {
-                            //Creating the usable dataset,
-                            // graphs and interpretations again so that it uses the new language and currency
-                            processData.prepareData();
-                        } else {
-                            //Just regenerating the graphs and interpretations to use the new language
-                            processData.createSalaryGraphForEverybody();
-                            processData.performAnalysis();
-                        }
-                        //Recreating predictions and prediction graphs so that they use the newly set language
+                        //Creating the usable dataset, graphs and interpretations again so that it uses the new currency
+                        processData.prepareData();
+                        //Recreating predictions and prediction graphs so that they use the newly set currency
                         if (processData.predictionsGenerated) {
                             processData.predictEvolutions(predictionValue);
                             processData.createSalaryGraphWithPredictionsForEverybody();
@@ -1805,16 +1773,10 @@ public class Main extends Application implements Initializable {
                     }
 
                     Platform.runLater(() -> {
-                        try {
-                            Scene mainScene = new Scene(new FXMLLoader(getClass().getResource("AppScreens/MainMenu-" + language + ".fxml")).load());
-                            mainScene.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
-                            getCurrentStage().setScene(mainScene);
-                        } catch (IOException ignored) {
-                        }
-                        //Changing the title of the current stage
-                        getCurrentStage().setTitle(language.equals("EN") ? "Main Menu" : language.equals("FR") ? "Menu Principal" : "Meniu Principal");
-                        switchTheme = new AnimatedThemeSwitcher(getCurrentStage().getScene(), new Animation(new FadeOut()).setSpeed(2.5));
-                        switchTheme.init();
+                        promptAnimator.setChild(null);
+                        darkOverlayAnimator.setChild(null);
+                        backgroundOperations.setVisible(false);
+                        darkOverlay.setVisible(false);
                     });
                 };
                 promptAnimator.setChild(new Pane(backgroundOperations));
@@ -1828,136 +1790,70 @@ public class Main extends Application implements Initializable {
                 darkOverlay.setVisible(true);
                 new Thread(rebuildResources).start();
             }));
+        } else currencyPicker.setDisable(true);
 
-            //Setting up the currency picker
-            currencyPicker.setItems(FXCollections.observableArrayList(currencies));
-            switch (currency) {
-                case "USD" -> currencyPicker.setValue(currencies[0]);
-                case "EUR" -> currencyPicker.setValue(currencies[1]);
-                case "RON" -> currencyPicker.setValue(currencies[2]);
-            }
-            //Checking if the currencies were ever updated or if they are set to their default -1.0 value
-            if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0) {
-                //When selecting another currency from the currency picker...
-                currencyPicker.getSelectionModel().selectedIndexProperty().addListener(((observable, oldValue, newValue) -> {
-                    //Updating the currency with the newly picked one
-                    currency = currencies[newValue.intValue()];
-                    Runnable rebuildResources = () -> {
-                        try {
-                            //Setting the boolean variable used by DataProcessing.createPDF method to true
-                            // so that the method generates a new PDF document with the new currency
-                            changedCurrency = true;
-                            //Rebuilding our resources
-                            BufferedWriter buildUserSettings = new BufferedWriter(new FileWriter("src/main/resources/com/gendergapanalyser/gendergapanalyser/Properties.txt"));
-                            buildUserSettings.write("DisplayMode=" + displayMode + "\nLanguage=" + language + "\nCurrency=" + currency + "\nExchangeRateLastUpdated=" + exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.YEAR) + "\nExchangeRateToEUR=" + exchangeRateEUR + "\nExchangeRateToRON=" + exchangeRateRON);
-                            buildUserSettings.close();
-                            //Creating the usable dataset, graphs and interpretations again so that it uses the new currency
-                            processData.prepareData();
-                            //Recreating predictions and prediction graphs so that they use the newly set currency
-                            if (processData.predictionsGenerated) {
-                                processData.predictEvolutions(predictionValue);
-                                processData.createSalaryGraphWithPredictionsForEverybody();
-                            }
-                        } catch (IOException ignored) {
-                        }
+        //Setting up the theme toggle
+        if (displayMode.equals("Dark")) {
+            darkModeButtonGlyph.setFitHeight(50);
+            lightModeButtonGlyph.setFitHeight(35);
+        } else {
+            lightModeButtonGlyph.setFitHeight(50);
+            darkModeButtonGlyph.setFitHeight(35);
+        }
 
-                        Platform.runLater(() -> {
-                            promptAnimator.setChild(null);
-                            darkOverlayAnimator.setChild(null);
-                            backgroundOperations.setVisible(false);
-                            darkOverlay.setVisible(false);
-                        });
-                    };
-                    promptAnimator.setChild(new Pane(backgroundOperations));
-                    darkOverlayAnimator.setChild(new Pane(darkOverlay));
-                    try {
-                        loadingCircleImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-" + displayMode + ".gif")));
-                    } catch (FileNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                    backgroundOperations.setVisible(true);
-                    darkOverlay.setVisible(true);
-                    new Thread(rebuildResources).start();
-                }));
-            } else currencyPicker.setDisable(true);
-
-            //Setting up the theme toggle
-            if (displayMode.equals("Dark")) {
-                darkModeButtonGlyph.setFitHeight(50);
-                lightModeButtonGlyph.setFitHeight(35);
-            } else {
-                lightModeButtonGlyph.setFitHeight(50);
-                darkModeButtonGlyph.setFitHeight(35);
-            }
-
-            //Setting up the information prompt
-            sourcesToggle.setOnAction(e -> {
-                if (contentCredits.isVisible()) {
-                    contentCredits.setVisible(false);
-                    contentSources.setVisible(true);
-                } else sourcesToggle.setSelected(true);
-            });
-            creditsToggle.setOnAction(e -> {
-                if (contentSources.isVisible()) {
-                    contentSources.setVisible(false);
-                    contentCredits.setVisible(true);
-                } else creditsToggle.setSelected(true);
-            });
-            Tooltip USDeptOfLaborHyperlinkDescription = new Tooltip(language.equals("EN") ? "Opens the United States Department of Labor website in your default browser." : language.equals("FR") ? "Ouvre le site web du Département du Travail des États Unis dans votre navigateur." : "Deschide site-ul web al Departamentului de Muncă al Statelor Unite în navigatorul dumneavoastră.");
-            USDeptOfLaborHyperlinkDescription.setFont(new Font("Calibri", 13));
-            USDeptOfLaborHyperlinkDescription.setShowDelay(Duration.millis(200));
-            USDeptOfLaborHyperlink.setOnAction(a -> {
-                try {
-                    Desktop.getDesktop().browse(new URI("https://www.dol.gov/agencies/wb/data/earnings/median-annual-sex-race-hispanic-ethnicity"));
-                } catch (IOException | URISyntaxException ignored) {
-                }
-            });
-            USDeptOfLaborHyperlink.setTooltip(USDeptOfLaborHyperlinkDescription);
-            usDeptOfLaborYearRangeLabel.setText(usDeptOfLaborYearRangeLabel.getText() + processData.dataset[0][1] + " - " + processData.dataset[processData.dataset.length - 1][1] + ".");
+        //Setting up the information prompt
+        sourcesToggle.setOnAction(e -> {
+            if (contentCredits.isVisible()) {
+                contentCredits.setVisible(false);
+                contentSources.setVisible(true);
+            } else sourcesToggle.setSelected(true);
+        });
+        creditsToggle.setOnAction(e -> {
+            if (contentSources.isVisible()) {
+                contentSources.setVisible(false);
+                contentCredits.setVisible(true);
+            } else creditsToggle.setSelected(true);
+        });
+        USDeptOfLaborHyperlink.setOnAction(a -> {
             try {
-                ERALogoImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-" + displayMode + ".png")));
+                Desktop.getDesktop().browse(new URI("https://www.dol.gov/agencies/wb/data/earnings/median-annual-sex-race-hispanic-ethnicity"));
+            } catch (IOException | URISyntaxException ignored) {
+            }
+        });
+        usDeptOfLaborYearRangeLabel.setText(usDeptOfLaborYearRangeLabel.getText() + processData.dataset[0][1] + " - " + processData.dataset[processData.dataset.length - 1][1] + ".");
+        try {
+            ERALogoImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/ExchangeRate-API-Logo-" + displayMode + ".png")));
+        } catch (FileNotFoundException ignored) {
+        }
+        ERAHyperlink.setOnAction(a -> {
+            try {
+                Desktop.getDesktop().browse(new URI("https://www.exchangerate-api.com/"));
+            } catch (IOException | URISyntaxException ignored) {
+            }
+        });
+        if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0)
+            ERALastUpdatedLabel.setText(ERALastUpdatedLabel.getText() + (exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) < 10 ? "0" + exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) : exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH)) + (exchangeRateLastUpdated.get(GregorianCalendar.MONTH) < 10 ? ".0" : ".") + exchangeRateLastUpdated.get(GregorianCalendar.MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.YEAR));
+        else
+            ERALastUpdatedLabel.setText(language.equals("EN") ? "Exchange rates were never updated." : language.equals("FR") ? "Les taux d'échange n'étaient jamais actualisés." : "Ratele de schimb nu au fost niciodată actualizate.");
+        if (displayMode.equals("Light")) {
+            try {
+                appIconCreditsImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon.png")));
             } catch (FileNotFoundException ignored) {
             }
-            Tooltip ERAHyperlinkDescription = new Tooltip(language.equals("EN") ? "Opens the ExchangeRates-API website in your default browser." : language.equals("FR") ? "Ouvre le site web d'ExchangeRates-API dans votre navigateur." : "Deschide site-ul web al ExchangeRates-API în navigatorul dumneavoastră.");
-            ERAHyperlinkDescription.setFont(new Font("Calibri", 13));
-            ERAHyperlinkDescription.setShowDelay(Duration.millis(200));
-            ERAHyperlink.setOnAction(a -> {
-                try {
-                    Desktop.getDesktop().browse(new URI("https://www.exchangerate-api.com/"));
-                } catch (IOException | URISyntaxException ignored) {
-                }
-            });
-            ERAHyperlink.setTooltip(ERAHyperlinkDescription);
-            if (exchangeRateEUR != -1.0 && exchangeRateRON != -1.0)
-                ERALastUpdatedLabel.setText(ERALastUpdatedLabel.getText() + (exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) < 10 ? "0" + exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH) : exchangeRateLastUpdated.get(GregorianCalendar.DAY_OF_MONTH)) + (exchangeRateLastUpdated.get(GregorianCalendar.MONTH) < 10 ? ".0" : ".") + exchangeRateLastUpdated.get(GregorianCalendar.MONTH) + "." + exchangeRateLastUpdated.get(GregorianCalendar.YEAR));
-            else
-                ERALastUpdatedLabel.setText(language.equals("EN") ? "Exchange rates were never updated." : language.equals("FR") ? "Les taux d'échange n'étaient jamais actualisés." : "Ratele de schimb nu au fost niciodată actualizate.");
-            if (displayMode.equals("Light")) {
-                try {
-                    appIconCreditsImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon.png")));
-                } catch (FileNotFoundException ignored) {
-                }
-            } else {
-                try {
-                    appIconCreditsImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png")));
-                } catch (FileNotFoundException ignored) {
-                }
+        } else {
+            try {
+                appIconCreditsImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/AppIcon-Dark.png")));
+            } catch (FileNotFoundException ignored) {
             }
-            versionText.setText(versionText.getText() + Updater.getCurrentAppVersion());
-
-            //Displaying the discard predictions button if the user generated predictions
-            discardPredictionsButton.setVisible(processData.predictionsGenerated);
         }
+        versionText.setText(versionText.getText() + Updater.getCurrentAppVersion());
+
+        //Displaying the discard predictions button if the user generated predictions
+        discardPredictionsButton.setVisible(processData.predictionsGenerated);
     }
 
     //Launch time!
     public static void main(String[] args) throws IOException {
-        //TODO cleanup main()
-        //FileUtils.copyURLToFile(URI.create("https://codeload.github.com/Alin63992/GenderGapAnalyser-experiments/zip/refs/heads/main").toURL(), new File("update"), 2000, 15000);
-        //System.out.println("GenderGapAnalyser-main".length());
-        //System.out.println("GenderGapAnalyser-experiments-main".length());
-        String destinationFolder = new File(".").getCanonicalPath();
-        String s = "C:\\Users\\alin1\\OneDrive\\Desktop\\Uni stuff\\Licenta\\GenderGapAnalyser\\UpdateInfo.txt";
         launch();
     }
 }

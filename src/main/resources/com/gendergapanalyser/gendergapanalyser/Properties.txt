@@ -1,6 +1,6 @@
 DisplayMode=Light
 Language=EN
 Currency=USD
-ExchangeRateLastUpdated=1.0.2024
-ExchangeRateToEUR=0.9169
-ExchangeRateToRON=4.5537
+ExchangeRateLastUpdated=2.1.2024
+ExchangeRateToEUR=0.9059
+ExchangeRateToRON=4.5023

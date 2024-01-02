@@ -13,6 +13,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -308,19 +309,23 @@
       <AnchorPane fx:id="dataSources" prefHeight="790.0" prefWidth="1100.0" visible="false">
          <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="570.0" layoutX="301.0" layoutY="105.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="500.0" />
-            <ToggleButton fx:id="sourcesToggle" layoutX="320.0" layoutY="119.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" selected="true" styleClass="informationToggles" text="Sources de Données" AnchorPane.topAnchor="119.0">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-               <toggleGroup>
-                  <ToggleGroup fx:id="informationButtons" />
-               </toggleGroup>
-            </ToggleButton>
-            <ToggleButton fx:id="creditsToggle" layoutX="550.0" layoutY="119.0" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" styleClass="informationToggles" text="Crédits" toggleGroup="$informationButtons">
-               <font>
-                  <Font name="Calibri" size="20.0" />
-               </font>
-            </ToggleButton>
+            <HBox alignment="CENTER" layoutX="320.0" layoutY="119.0">
+               <children>
+                  <ToggleButton fx:id="sourcesToggle" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" selected="true" styleClass="informationToggles" text="Sources de Données">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                     <toggleGroup>
+                        <ToggleGroup fx:id="informationButtons" />
+                     </toggleGroup>
+                  </ToggleButton>
+                  <ToggleButton fx:id="creditsToggle" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" styleClass="informationToggles" text="Crédits" toggleGroup="$informationButtons">
+                     <font>
+                        <Font name="Calibri" size="20.0" />
+                     </font>
+                  </ToggleButton>
+               </children>
+            </HBox>
             <AnchorPane fx:id="contentSources" layoutX="320.0" layoutY="165.0" prefHeight="460.0" prefWidth="460.0">
                <children>
                   <ImageView fitHeight="126.0" fitWidth="138.0" layoutX="9.0" layoutY="66.0" pickOnBounds="true" preserveRatio="true">
@@ -349,6 +354,13 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Ouvre le site web du Département du Travail des États Unis dans votre navigateur.">
+                           <font>
+                              <Font name="Calibri" size="13.0" />
+                           </font>
+                        </Tooltip>
+                     </tooltip>
                   </Hyperlink>
                   <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="163.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -377,6 +389,13 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Ouvre le site web d'ExchangeRates-API dans votre navigateur.">
+                           <font>
+                              <Font name="Calibri" size="13.0" />
+                           </font>
+                        </Tooltip>
+                     </tooltip>
                   </Hyperlink>
                   <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="375.0" pickOnBounds="true" preserveRatio="true">
                      <image>

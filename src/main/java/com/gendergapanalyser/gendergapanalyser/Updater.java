@@ -24,7 +24,7 @@ import java.util.zip.ZipFile;
 
 public class Updater {
     //Variable that holds the date this update will have been published
-    protected static final GregorianCalendar appCurrentUpdateDate = new GregorianCalendar(2023, Calendar.NOVEMBER, 27);
+    protected static final GregorianCalendar appCurrentUpdateDate = new GregorianCalendar(2024, Calendar.JANUARY, 03);
     //Variable that holds the number of revisions that this update will have been published
     private static final int dailyRevision = 1;
     //Array that holds the update details
@@ -67,8 +67,13 @@ public class Updater {
 
 
     public static void performUpdate() throws IOException {
-        ArrayList<String> copiedFiles = new ArrayList<>();
         Runnable applyUpdate = () -> {
+            ArrayList<String> copiedFiles = new ArrayList<>();
+
+            //Setting the app's current state as being in the updating stage, in the correct update stage,
+            // to display the correct message on the splash screen.
+            Main.appState = "UpdateStage-Update";
+
             //Backing up the currently installed app files into the GenderGapAnalyser-Backup folder
             String backupFolder = "GenderGapAnalyser-Backup";
             try {
@@ -94,7 +99,9 @@ public class Updater {
 
             //Preparing the update
             File downloadedUpdateArchive = new File("GenderGapAnalyser-Update.zip");
-            BufferedWriter bw = null;
+            BufferedWriter writeUpdateLog = null;
+            BufferedWriter writeRemainingFiles = null;
+            ZipFile archivedUpdate = null;
             try {
                 //Resuming update, if a crash happened during the update
                 //If the update info log file exists
@@ -116,31 +123,31 @@ public class Updater {
                             downloadedUpdateArchive.delete();
                         //Recreating the update info log file to contain the newest version
                         br.close();
-                        bw = new BufferedWriter(new FileWriter("UpdateInfo.txt"));
-                        bw.write("Version=" + Main.updateDetails[0]);
-                        bw.newLine();
-                        bw.close();
+                        writeUpdateLog = new BufferedWriter(new FileWriter("UpdateInfo.txt"));
+                        writeUpdateLog.write("Version=" + Main.updateDetails[0]);
+                        writeUpdateLog.newLine();
+                        writeUpdateLog.close();
                     }
                 }
                 else {
                     //Creating the update info log file
-                    bw = new BufferedWriter(new FileWriter("UpdateInfo.txt"));
-                    bw.write("Version=" + Main.updateDetails[0]);
-                    bw.newLine();
-                    bw.close();
+                    writeUpdateLog = new BufferedWriter(new FileWriter("UpdateInfo.txt"));
+                    writeUpdateLog.write("Version=" + Main.updateDetails[0]);
+                    writeUpdateLog.newLine();
+                    writeUpdateLog.close();
                 }
                 if (!downloadedUpdateArchive.exists()) {
                     //Downloading the GitHub archive with the app files, if it doesn't exist
                     FileUtils.copyURLToFile(URI.create("https://codeload.github.com/Alin63992/GenderGapAnalyser-experiments/zip/refs/tags/" + updateDetails[0]).toURL(), downloadedUpdateArchive, 2000, 15000);
                 }
+                archivedUpdate = new ZipFile(downloadedUpdateArchive);
 
                 //Setting the destination directory in which the update will be unzipped and the contents of the update are copied
                 String destinationFolder = new File(".").getCanonicalPath();
                 //Opening the update info log file
-                bw = new BufferedWriter(new FileWriter("UpdateInfo.txt", new File("UpdateInfo.txt").exists()));
+                writeUpdateLog = new BufferedWriter(new FileWriter("UpdateInfo.txt", new File("UpdateInfo.txt").exists()));
 
                 //Unzipping the update archive to reveal the GenderGapAnalyser-main folder
-                ZipFile archivedUpdate = new ZipFile(downloadedUpdateArchive);
                 Enumeration<? extends ZipEntry> enu = archivedUpdate.entries();
                 //Traversing the archive's contents
                 while (enu.hasMoreElements()) {
@@ -168,33 +175,40 @@ public class Updater {
                                 try {
                                     Files.copy(archivedUpdate.getInputStream(entry), Path.of(zipEntryToBeExtracted.getCanonicalPath()), StandardCopyOption.REPLACE_EXISTING);
                                 }
-                                catch (FileSystemException e) {
-                                    e.printStackTrace();
-
+                                catch (FileSystemException e){
+                                    System.out.println(zipEntryToBeExtracted.getCanonicalPath());
+                                    Files.copy(archivedUpdate.getInputStream(entry), Path.of(zipEntryToBeExtracted.getCanonicalPath() + ".copy"));
+                                    fileIsNew = true;
+                                    //Main.filesInUseToBeReplacedAtNextStart.createNewFile();
+                                    if (writeRemainingFiles == null) {
+                                        writeRemainingFiles = new BufferedWriter(new FileWriter(Main.filesInUseToBeReplacedAtNextStart.getName()));
+                                    }
+                                    writeRemainingFiles.write(Path.of(zipEntryToBeExtracted.getCanonicalPath()).toString());
+                                    writeRemainingFiles.newLine();
                                 }
                             }
                             //Adding the new folder or the newly copied file to the copiedFiles array and the update log
                             copiedFiles.add(fileIsNew ? "New:" + zipEntryToBeExtracted.getName() : zipEntryToBeExtracted.getCanonicalPath());
                             if (fileIsNew)
-                                bw.write("New:");
-                            bw.write(zipEntryToBeExtracted.getCanonicalPath());
-                            bw.newLine();
+                                writeUpdateLog.write("New:");
+                            writeUpdateLog.write(zipEntryToBeExtracted.getCanonicalPath());
+                            writeUpdateLog.newLine();
                             //For every 10 operations made, we flush the writer's buffer to the file so that the update
                             // log is always up to date on the progress.
                             if (copiedFiles.size() % 10 == 0)
-                                bw.flush();
+                                writeUpdateLog.flush();
                         }
                     }
                 }
                 archivedUpdate.close();
-                bw.close();
+                writeUpdateLog.close();
+                writeRemainingFiles.close();
             }
             catch (IOException e) {
                 e.printStackTrace();
                 try {
                     //Setting the screen to inform the user that an error occurred and a rollback is in progress
-                    Main.updateInProgress.delete();
-                    Main.rollbackInProgress.createNewFile();
+                    Main.appState = "UpdateStage-Rollback";
                     /*Platform.runLater(() -> {
                         try {
                             Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
@@ -203,11 +217,15 @@ public class Updater {
                         }
                         catch (IOException ignored) {}
                     });*/
-                    Main.splashScreenController.toggleRollbackText(true);
+
+                    archivedUpdate.close();
 
                     //Closing the stream that writes to the update info log file, in case an error occurs
                     // before the file is closed for writing
-                    bw.close();
+                    writeUpdateLog.close();
+                    //Closing the stream that writes to the file containing files in use that remain to be replaced,
+                    // in case an error occurs before the file is closed for writing
+                    writeRemainingFiles.close();
 
                     //Traversing the array which holds the new/modified files
                     for (String file: copiedFiles) {
@@ -221,10 +239,22 @@ public class Updater {
                         else {
                             //Copying any file (not folder) that was overwritten during the update from the backup folder back to its original location
                             if (!new File(file).isDirectory()) {
+                                System.out.println(file);
                                 String destinationFolder = new File(".").getCanonicalPath();
+                                System.out.println(destinationFolder);
                                 File filePathIncludingBackupFolder = new File(file.replace(destinationFolder, destinationFolder + File.separator + backupFolder));
+                                System.out.println(filePathIncludingBackupFolder.getPath());
                                 Files.copy(filePathIncludingBackupFolder.toPath(), new File(file).toPath(), StandardCopyOption.REPLACE_EXISTING);
                             }
+                        }
+                    }
+
+                    //Deleting the temporary files that would replace the files in use at the next start
+                    if (Main.filesInUseToBeReplacedAtNextStart.exists()) {
+                        BufferedReader readRemainingFiles = new BufferedReader(new FileReader(Main.filesInUseToBeReplacedAtNextStart.getName()));
+                        String line;
+                        while ((line = readRemainingFiles.readLine()) != null) {
+                            new File(line).delete();
                         }
                     }
                 } catch (IOException ex) {
@@ -233,9 +263,10 @@ public class Updater {
             }
 
             //Cleaning up
-            
             try {
-                Main.cleanupInProgress.createNewFile();
+                /*if (Main.updateInProgress.exists())
+                    Main.updateInProgress.delete();*/
+                Main.appState = "UpdateStage-Cleanup";
                 /*Platform.runLater(() -> {
                     try {
                         Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
@@ -244,21 +275,19 @@ public class Updater {
                     }
                     catch (IOException ignored) {}
                 });*/
-                Main.splashScreenController.toggleCleanupText(true);
                 downloadedUpdateArchive.delete();
                 FileUtils.deleteDirectory(new File(backupFolder));
                 new File("UpdateInfo.txt").delete();
-                Main.cleanupInProgress.delete();
-                if (Main.updateInProgress.exists())
-                    Main.updateInProgress.delete();
+                Main.interruptThreads = true;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 
             //Finishing the update
             Platform.runLater(() -> {
-                Alert updateDone = new Alert(Alert.AlertType.INFORMATION);
-                if (!Main.rollbackInProgress.exists()) {
+                Alert updateDone;
+                if (!Main.appState.equals("UpdateState-Rollback")) {
+                    updateDone = new Alert(Alert.AlertType.INFORMATION);
                     if (Main.language.equals("EN")) {
                         updateDone.setHeaderText("Done updating!");
                         updateDone.setContentText("The application now has the most recent updates installed!\nBefore you can use the new features and experience the new bug fixes and improvements, the app will close, and you'll need to run it again from your IDE.\nEnjoy the app!");
@@ -271,7 +300,7 @@ public class Updater {
                     }
                 }
                 else {
-                    Main.rollbackInProgress.delete();
+                    updateDone = new Alert(Alert.AlertType.ERROR);
                     if (Main.language.equals("EN")) {
                         updateDone.setHeaderText("Done rolling back changes!");
                         updateDone.setContentText("The application encountered an error while updating and it rolled back the changes, so you can still use the version you had installed before!\nIn order to use it again, the app will close, and you'll need to run it again from your IDE.\nEnjoy the app!");
@@ -286,14 +315,18 @@ public class Updater {
                 updateDone.setTitle(updateDone.getHeaderText());
                 updateDone.getDialogPane().setMaxWidth(750);
                 try {
-                    ((Stage)updateDone.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-information.png")));
-                } catch (FileNotFoundException ignored) {}
+                    ((Stage)updateDone.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-" + (updateDone.getAlertType().equals(Alert.AlertType.ERROR) ? "error.png" : "information.png"))));
+                    FileUtils.deleteDirectory(new File("src/main/resources/com/gendergapanalyser/gendergapanalyser/ProgressFiles"));
+                } catch (IOException ignored) {}
                 Main.getCurrentStage().close();
+                if (Main.updateInProgress.exists())
+                    Main.updateInProgress.delete();
                 updateDone.show();
             });
         };
         if (!Main.updateInProgress.exists()) {
             Main.cleanUp();
+            Files.createDirectories(Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/ProgressFiles"));
             Main.updateInProgress.createNewFile();
         }
         //Setting the screen to inform the user that an update is in progress
@@ -301,7 +334,6 @@ public class Updater {
         Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
         splash.getStylesheets().setAll(Objects.requireNonNull(Updater.class.getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
         Main.getCurrentStage().setScene(splash);
-        //Main.splashScreenController.toggleUpdateText(true);
         new Thread(applyUpdate).start();
     }
 }

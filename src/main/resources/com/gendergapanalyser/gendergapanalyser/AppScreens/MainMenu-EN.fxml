@@ -14,6 +14,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -309,7 +310,7 @@
       <AnchorPane fx:id="dataSources" prefHeight="790.0" prefWidth="1100.0" visible="false">
          <children>
             <Rectangle arcHeight="5.0" arcWidth="5.0" fill="WHITE" height="570.0" layoutX="301.0" layoutY="105.0" stroke="BLACK" strokeType="INSIDE" strokeWidth="0.0" styleClass="prompts" width="500.0" />
-            <HBox alignment="CENTER" layoutX="320.0" layoutY="119.0" prefHeight="37.0" prefWidth="460.0">
+            <HBox alignment="CENTER" layoutX="320.0" layoutY="119.0">
                <children>
                   <ToggleButton fx:id="sourcesToggle" mnemonicParsing="false" prefHeight="37.0" prefWidth="230.0" selected="true" styleClass="informationToggles" text="Data Sources">
                      <font>
@@ -354,6 +355,13 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Opens the United States Department of Labor website in your default browser.">
+                           <font>
+                              <Font name="Calibri" size="13.0" />
+                           </font>
+                        </Tooltip>
+                     </tooltip>
                   </Hyperlink>
                   <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="172.0" pickOnBounds="true" preserveRatio="true">
                      <image>
@@ -382,6 +390,13 @@
                            </image>
                         </ImageView>
                      </graphic>
+                     <tooltip>
+                        <Tooltip text="Opens the ExchangeRates-API website in your default browser.">
+                           <font>
+                              <Font name="Calibri" size="13.0" />
+                           </font>
+                        </Tooltip>
+                     </tooltip>
                   </Hyperlink>
                   <ImageView fitHeight="40.0" fitWidth="40.0" layoutX="150.0" layoutY="375.0" pickOnBounds="true" preserveRatio="true">
                      <image>

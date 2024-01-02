@@ -23,47 +23,83 @@ public class ManageSplashScreen implements Initializable {
     public Text rollbackText;
     public static double dragX;
     public static double dragY;
+    private final Runnable refreshSplashScreenMessages = () -> {
+        while (!Main.interruptThreads) {
+            switch (Main.appState) {
+                case "StartupStage-Recovery" -> {
+                    if (!recoveryText.isVisible()) {
+                        toggleUpdateText(false);
+                        toggleRollbackText(false);
+                        toggleCleanupText(false);
+                        toggleRecoveryText(true);
+                    }
+                }
+                case "UpdateStage-Update" -> {
+                    if (!updateText.isVisible()) {
+                        toggleRecoveryText(false);
+                        toggleRollbackText(false);
+                        toggleCleanupText(false);
+                        toggleUpdateText(true);
+                    }
+                }
+                case "UpdateStage-Rollback" -> {
+                    if (!rollbackText.isVisible()) {
+                        toggleRecoveryText(false);
+                        toggleUpdateText(false);
+                        toggleCleanupText(false);
+                        toggleRollbackText(true);
+                    }
+                }
+                case "UpdateStage-Cleanup" -> {
+                    if (!cleanupText.isVisible()) {
+                        toggleRecoveryText(false);
+                        toggleUpdateText(false);
+                        toggleRollbackText(false);
+                        toggleCleanupText(true);
+                    }
+                }
+                case "Normal" -> {
+                    if (recoveryText.isVisible()) {
+                        toggleRecoveryText(false);
+                        toggleUpdateText(false);
+                        toggleRollbackText(false);
+                        toggleCleanupText(false);
+                    }
+                }
+            }
+        }
+    };
+    private final Thread keepSplashScreenUpdated = new Thread(refreshSplashScreenMessages);
 
     @FXML
     private void exitApp() {
         Main.exitAppMain();
     }
 
-    //Function ran when the minimize button is clicked
+    //Function ran when the minimisation button is clicked
     @FXML
     private void minimizeWindow() {
         Main.minimizeWindowMain();
     }
 
     public void toggleUpdateText(boolean isVisible) {
-        recoveryText.setVisible(!isVisible);
-        rollbackText.setVisible(!isVisible);
-        cleanupText.setVisible(!isVisible);
         updateText.setVisible(isVisible);
         noCloseWindowText.setVisible(isVisible);
     }
 
     public void toggleRecoveryText(boolean isVisible) {
         recoveryText.setVisible(isVisible);
-        rollbackText.setVisible(!isVisible);
-        cleanupText.setVisible(!isVisible);
-        updateText.setVisible(!isVisible);
         noCloseWindowText.setVisible(isVisible);
     }
 
     public void toggleRollbackText(boolean isVisible) {
-        recoveryText.setVisible(!isVisible);
         rollbackText.setVisible(isVisible);
-        cleanupText.setVisible(!isVisible);
-        updateText.setVisible(!isVisible);
         noCloseWindowText.setVisible(isVisible);
     }
 
     public void toggleCleanupText(boolean isVisible) {
-        recoveryText.setVisible(!isVisible);
-        rollbackText.setVisible(!isVisible);
         cleanupText.setVisible(isVisible);
-        updateText.setVisible(!isVisible);
+        noCloseWindowText.setVisible(isVisible);
     }
 
     @Override
@@ -84,10 +120,6 @@ public class ManageSplashScreen implements Initializable {
             loadingCircleImageView.setImage(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/loading-" + Main.displayMode + ".gif")));
         } catch (FileNotFoundException ignored) {}
 
-        updateText.setVisible(Main.updateInProgress.exists());
-        recoveryText.setVisible(Main.recoveryInProgress.exists());
-        rollbackText.setVisible(Main.rollbackInProgress.exists());
-        noCloseWindowText.setVisible(Main.updateInProgress.exists() || Main.recoveryInProgress.exists() || Main.rollbackInProgress.exists());
-        cleanupText.setVisible(Main.cleanupInProgress.exists());
+        keepSplashScreenUpdated.start();
     }
 }

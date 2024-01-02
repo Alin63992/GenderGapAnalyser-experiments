@@ -20,7 +20,7 @@ public class GeneratePDFInBackground implements Runnable {
         } catch (IOException ignored) {}
 
         //If this thread is interrupted from the outside, we stop it
-        if (Thread.currentThread().isInterrupted()) {
+        if (Main.interruptThreads) {
             try {
                 Files.delete(Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/Analysis.pdf"));
             } catch (IOException ignored) {}

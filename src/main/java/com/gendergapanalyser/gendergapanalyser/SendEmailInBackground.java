@@ -35,8 +35,8 @@ public class SendEmailInBackground implements Runnable {
             } catch (IOException ignored) {}
         }
 
-        //Checking  if this thread is interrupted and stopping it if it is
-        if (Thread.currentThread().isInterrupted()) {
+        //Checking if this thread is interrupted and stopping it if it is
+        if (Main.interruptThreads) {
             try {
                 Files.delete(PDFReportPath);
             } catch (IOException ignored) {}
@@ -49,8 +49,8 @@ public class SendEmailInBackground implements Runnable {
         pdfDocument.setDisposition(EmailAttachment.ATTACHMENT);
         pdfDocument.setDescription(Main.language.equals("EN") ? "Gender equality in the United States" : Main.language.equals("FR") ? "L'égalité entre les genres dans les États-Unis" : "Egalitatea între genuri în Statele Unite");
 
-        //Checking  if this thread is interrupted and stopping it if it is
-        if (Thread.currentThread().isInterrupted()) {
+        //Checking if this thread is interrupted and stopping it if it is
+        if (Main.interruptThreads) {
             try {
                 Files.delete(PDFReportPath);
             } catch (IOException ignored) {}
@@ -74,8 +74,8 @@ public class SendEmailInBackground implements Runnable {
             //Setting the sender email address
             mail.setFrom(Main.outgoingAccountEmail);
 
-            //Checking  if this thread is interrupted and stopping it if it is
-            if (Thread.currentThread().isInterrupted()) {
+            //Checking if this thread is interrupted and stopping it if it is
+            if (Main.interruptThreads) {
                 try {
                     Files.delete(PDFReportPath);
                 } catch (IOException ignored) {}
@@ -94,8 +94,8 @@ public class SendEmailInBackground implements Runnable {
             //Lift off! (Sending the email)
             mail.send();
 
-            //Checking  if this thread is interrupted and stopping it if it is
-            if (Thread.currentThread().isInterrupted()) {
+            //Checking if this thread is interrupted and stopping it if it is
+            if (Main.interruptThreads) {
                 try {
                     Files.delete(PDFReportPath);
                 } catch (IOException ignored) {}
@@ -121,8 +121,8 @@ public class SendEmailInBackground implements Runnable {
                     ((Stage)emailSent.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-information.png")));
                 } catch (FileNotFoundException ignored) {}
 
-                //Checking  if this thread is interrupted and stopping it if it is
-                if (Thread.currentThread().isInterrupted()) {
+                //Checking if this thread is interrupted and stopping it if it is
+                if (Main.interruptThreads) {
                     try {
                         Files.delete(PDFReportPath);
                     } catch (IOException ignored) {}
@@ -140,8 +140,8 @@ public class SendEmailInBackground implements Runnable {
                 emailSent.show();
             });
         } catch (EmailException e) {
-            //Checking  if this thread is interrupted and stopping it if it is
-            if (Thread.currentThread().isInterrupted()) {
+            //Checking if this thread is interrupted and stopping it if it is
+            if (Main.interruptThreads) {
                 try {
                     Files.delete(PDFReportPath);
                 } catch (IOException ignored) {}
@@ -166,8 +166,8 @@ public class SendEmailInBackground implements Runnable {
                     ((Stage)errorSendingEmail.getDialogPane().getScene().getWindow()).getIcons().add(new Image(new FileInputStream("src/main/resources/com/gendergapanalyser/gendergapanalyser/Glyphs/Miscellaneous/alert-error.png")));
                 } catch (FileNotFoundException ignored) {}
 
-                //Checking  if this thread is interrupted and stopping it if it is
-                if (Thread.currentThread().isInterrupted()) {
+                //Checking if this thread is interrupted and stopping it if it is
+                if (Main.interruptThreads) {
                     try {
                         Files.delete(PDFReportPath);
                     } catch (IOException ignored) {}

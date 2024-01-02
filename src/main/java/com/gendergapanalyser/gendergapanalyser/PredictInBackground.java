@@ -19,7 +19,7 @@ public class PredictInBackground implements Runnable {
             Main.processData.predictEvolutions(Main.predictionValue);
 
             //If this thread is interrupted from the outside, we stop it
-            if (Thread.currentThread().isInterrupted()) return;
+            if (Main.interruptThreads) return;
 
             Platform.runLater(() -> {
                 //Preparing a new non-resizable window with a title, that displays the graph screen

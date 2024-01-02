@@ -30,7 +30,7 @@ public class GetUpdatedDatasetInBackground implements Runnable {
             Path downloadedDatasetPath = Path.of("src/main/resources/com/gendergapanalyser/gendergapanalyser/0DownloadedDataset.csv");
 
             //Checking  if this thread is interrupted and stopping it if it is
-            if (Thread.currentThread().isInterrupted()) {
+            if (Main.interruptThreads) {
                 Files.delete(downloadedDatasetPath);
                 return;
             }
@@ -48,7 +48,7 @@ public class GetUpdatedDatasetInBackground implements Runnable {
             } catch (IOException ignored) {}
 
             //Checking  if this thread is interrupted and stopping it if it is
-            if (Thread.currentThread().isInterrupted()) {
+            if (Main.interruptThreads) {
                 Files.delete(downloadedDatasetPath);
                 return;
             }
@@ -58,12 +58,12 @@ public class GetUpdatedDatasetInBackground implements Runnable {
             Main.processData.prepareData();
 
             //Checking if this thread is interrupted and stopping it if it is
-            if (Thread.currentThread().isInterrupted()) {
+            if (Main.interruptThreads) {
                 Files.delete(downloadedDatasetPath);
                 return;
             }
 
-            //Checking  if the currently open window is the main menu one
+            //Checking if the currently open window is the main menu one
             if (Main.getCurrentStage() != null && !Main.getCurrentStage().getTitle().equals(Main.language.equals("EN") ? "Main Menu" : Main.language.equals("FR") ? "Menu Principal" : "Meniu Principal") || predictionsGenerated || PDFGenerated) {
                 if (!Main.getCurrentStage().getTitle().equals("Gender Gap Analyser")) {
                     Platform.runLater(() -> {
@@ -85,8 +85,8 @@ public class GetUpdatedDatasetInBackground implements Runnable {
                         } catch (FileNotFoundException ignored) {
                         }
 
-                        //Checking  if this thread is interrupted and stopping it if it is
-                        if (Thread.currentThread().isInterrupted()) {
+                        //Checking if this thread is interrupted and stopping it if it is
+                        if (Main.interruptThreads) {
                             try {
                                 Files.delete(downloadedDatasetPath);
                             } catch (IOException ignored) {
