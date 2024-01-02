@@ -772,24 +772,6 @@ public class Main extends Application implements Initializable {
         return updateRouteSelectedOrRecoveryAborted;
     }
 
-    /*private void reloadSplashScreen(boolean createRecoveryInProgressFile) throws IOException {
-        if (createRecoveryInProgressFile)
-            recoveryInProgress.createNewFile();
-        else
-            recoveryInProgress.delete();
-        //Reloading the splash screen to indicate that recovery has started or ended
-        if (getCurrentStage() != null) {
-            Platform.runLater(() -> {
-                try {
-                    Scene splash = new Scene(new FXMLLoader(getClass().getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
-                    splash.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-                    getCurrentStage().setScene(splash);
-                } catch (IOException ignored) {
-                }
-            });
-        }
-    }*/
-
     @FXML
     private boolean checkAndRecover() {
         System.out.println("Beginning application integrity check...");
@@ -1621,13 +1603,12 @@ public class Main extends Application implements Initializable {
                     splash.getStylesheets().setAll(Objects.requireNonNull(getClass().getResource("Stylesheets/" + displayMode + "Mode.css")).toExternalForm());
                     getCurrentStage().setScene(splash);
                     getCurrentStage().show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                } catch (IOException ignored) {}
 
                 //Checking if the app crashed during an update (the .updateinprogress file exists),
                 // to resume updating if it did
                 if (updateInProgress.exists()) {
+                    Updater.checkForUpdate();
                     Updater.performUpdate();
                 }
                 else {

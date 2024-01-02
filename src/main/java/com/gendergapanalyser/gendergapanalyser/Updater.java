@@ -171,12 +171,10 @@ public class Updater {
                                     //Categorizing the file as new, if not
                                     fileIsNew = true;
                                 //Copying the file to the app files
-                                //TODO doesn't work for app icons, ERA logos and the loading gifs (FileSystemException: file in use). Maybe schedule them to be replaced before the update done alert is shown?
                                 try {
                                     Files.copy(archivedUpdate.getInputStream(entry), Path.of(zipEntryToBeExtracted.getCanonicalPath()), StandardCopyOption.REPLACE_EXISTING);
                                 }
-                                catch (FileSystemException e){
-                                    System.out.println(zipEntryToBeExtracted.getCanonicalPath());
+                                catch (FileSystemException e) {
                                     Files.copy(archivedUpdate.getInputStream(entry), Path.of(zipEntryToBeExtracted.getCanonicalPath() + ".copy"));
                                     fileIsNew = true;
                                     //Main.filesInUseToBeReplacedAtNextStart.createNewFile();
@@ -205,19 +203,11 @@ public class Updater {
                 writeRemainingFiles.close();
             }
             catch (IOException e) {
-                e.printStackTrace();
                 try {
                     //Setting the screen to inform the user that an error occurred and a rollback is in progress
                     Main.appState = "UpdateStage-Rollback";
-                    /*Platform.runLater(() -> {
-                        try {
-                            Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
-                            splash.getStylesheets().setAll(Objects.requireNonNull(Updater.class.getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-                            Main.getCurrentStage().setScene(splash);
-                        }
-                        catch (IOException ignored) {}
-                    });*/
 
+                    //Closing the update zip file
                     archivedUpdate.close();
 
                     //Closing the stream that writes to the update info log file, in case an error occurs
@@ -264,17 +254,7 @@ public class Updater {
 
             //Cleaning up
             try {
-                /*if (Main.updateInProgress.exists())
-                    Main.updateInProgress.delete();*/
                 Main.appState = "UpdateStage-Cleanup";
-                /*Platform.runLater(() -> {
-                    try {
-                        Scene splash = new Scene(new FXMLLoader(Updater.class.getResource("AppScreens/SplashScreen-" + Main.language + ".fxml")).load());
-                        splash.getStylesheets().setAll(Objects.requireNonNull(Updater.class.getResource("Stylesheets/" + Main.displayMode + "Mode.css")).toExternalForm());
-                        Main.getCurrentStage().setScene(splash);
-                    }
-                    catch (IOException ignored) {}
-                });*/
                 downloadedUpdateArchive.delete();
                 FileUtils.deleteDirectory(new File(backupFolder));
                 new File("UpdateInfo.txt").delete();
